@@ -1,5 +1,8 @@
 insert 7
+insert 2
+insert 3
+print
 remove 3
-find 2
+find 7
 print
 quit

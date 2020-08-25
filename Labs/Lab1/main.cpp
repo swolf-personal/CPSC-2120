@@ -19,25 +19,25 @@ int main(void)
 
       cin >> key;
       if (I.find(key))
-	cout << "Error!  Key " << key << " already in structure!\n";
+	      cout << "Error!  Key " << key << " already in structure!\n";
       else
-	I.insert(key);
+	      I.insert(key);
 
     } else if (command == "remove") {
       
       cin >> key;
       if (!I.find(key)) 
-	cout << "Error!  Key " << key << " not in structure!\n";
+	      cout << "Error!  Key " << key << " not in structure!\n";
       else
-	I.remove(key);
+	      I.remove(key);
 
     } else if (command == "find") {
 
       cin >> key;
       if (I.find(key))
-	cout << "Key " << key << " present.\n";
+	      cout << "Key " << key << " present.\n";
       else
-	cout << "Key " << key << " absent.\n";
+	      cout << "Key " << key << " absent.\n";
 
     } else if (command == "print") {
 

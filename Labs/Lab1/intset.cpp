@@ -6,12 +6,21 @@ using namespace std;
 
 Intset::Intset()
 {
-
+  head = NULL;
 }
 
 Intset::~Intset()
 {
-
+  //Two itrs
+  Node* prevItr = NULL;
+  Node* itr = head;
+  //If a list is larger than zero
+  while(itr->next != NULL)
+  {
+    prevItr = itr;
+    itr = itr->next;
+    delete prevItr;
+  }
 }
 
 /* Return true if key is in the set */
@@ -43,33 +52,35 @@ void Intset::insert(int key)
   {
     //If head is greater make new node new head
     if(itr->key > key) {
-      Node newNode;
-      newNode.key = key;
-      newNode.next = itr;
-      head = &newNode;
+      Node *newNode = new Node;
+      newNode->key = key;
+      newNode->next = itr;
+      head = newNode;
     //Head is less than, find the location where the itr becomes greater
     } else if(itr->key < key) {
       do {
         prevItr = itr;
         itr = itr->next;
       } while(itr->key < key);
-      Node newNode;
-      newNode.key = key;
-      newNode.next = itr;
-      prevItr->next = &newNode;
+      Node *newNode = new Node;
+      newNode->key = key;
+      newNode->next = itr;
+      prevItr->next = newNode;
     }
   //No list, make one
   } else {
-  Node newNode;
-  newNode.key = key;
-  head = &newNode;
+    Node *newNode = new Node;
+    newNode->key = key;
+    newNode->next = NULL;
+    
+    head = newNode;
   }
 }
 
 /* Removes a key.  It is an error if key isn't in the set */
 void Intset::remove(int key)
 {
-  assert(!find(key));
+  assert(find(key));
 
   //Two itrs
   Node* prevItr = NULL;
@@ -83,11 +94,13 @@ void Intset::remove(int key)
         //If head, ez
         if(prevItr == NULL) {
           head = itr->next;
+          delete itr;
           break;
           }
         //Not head, not as ez
         else {
           prevItr->next = itr->next;
+          delete itr;
           break;
         }
       }
@@ -98,9 +111,13 @@ void Intset::remove(int key)
 
 void Intset::print(void)
 {
-  Node *itr = head;
-  while(itr != NULL) {
-    cout << itr->key << endl;
-    itr = itr->next;
+  Node* itr = head;
+
+  if(itr != NULL)
+  {
+    do {
+      cout << itr->key << endl;
+      itr = itr->next;
+    } while(itr != NULL);
   }
 }

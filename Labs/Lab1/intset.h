@@ -1,10 +1,9 @@
 #ifndef INTSET_H /* Prevent multiple inclusion... */
 #define INTSET_H
 
-typedef struct {
+typedef struct Node {
   int key;
-  Node *prev;
-  Node *next;
+  Node *next = NULL;
 } Node;
 
 class Intset {
