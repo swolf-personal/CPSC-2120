@@ -4,19 +4,16 @@
 
 using namespace std;
 
-Intset::Intset()
-{
+Intset::Intset() {
   head = NULL;
 }
 
-Intset::~Intset()
-{
+Intset::~Intset() {
   //Two itrs
   Node* prevItr = NULL;
   Node* itr = head;
   //If a list is larger than zero
-  while(itr->next != NULL)
-  {
+  while(itr != NULL) {
     prevItr = itr;
     itr = itr->next;
     delete prevItr;
@@ -24,32 +21,28 @@ Intset::~Intset()
 }
 
 /* Return true if key is in the set */
-bool Intset::find(int key)
-{
+bool Intset::find(int key) {
   Node* itr = head;
-  if(itr != NULL)
-  {
+  if(itr != NULL) {
     do {
       if(itr->key == key)
         return true;
-      if(itr->next != NULL)
-        itr = itr->next;
-    } while (itr->next != NULL);
+      itr = itr->next;
+    } while (itr != NULL);
   }
   return false;
 }
 
 /* Inserts a new key.  It is an error if key is already in the set. */
-void Intset::insert(int key)
-{
+void Intset::insert(int key) {
+  
   assert(!find(key));
 
   //Two itrs
   Node* prevItr = NULL;
   Node* itr = head;
   //If a list is larger than zero
-  if(itr != NULL)
-  {
+  if(itr != NULL) {
     //If head is greater make new node new head
     if(itr->key > key) {
       Node *newNode = new Node;
@@ -78,25 +71,22 @@ void Intset::insert(int key)
 }
 
 /* Removes a key.  It is an error if key isn't in the set */
-void Intset::remove(int key)
-{
+void Intset::remove(int key) {
   assert(find(key));
 
   //Two itrs
   Node* prevItr = NULL;
   Node* itr = head;
   //If a list is larger than zero
-  if(itr != NULL)
-  {
-    while(itr != NULL) 
-    {
+  if(itr != NULL) {
+    while(itr != NULL) {
       if(itr->key == key) {
         //If head, ez
         if(prevItr == NULL) {
           head = itr->next;
           delete itr;
           break;
-          }
+        }
         //Not head, not as ez
         else {
           prevItr->next = itr->next;
@@ -104,17 +94,16 @@ void Intset::remove(int key)
           break;
         }
       }
+      prevItr = itr;
       itr = itr->next;
     }
   }
 }
 
-void Intset::print(void)
-{
+void Intset::print(void) {
   Node* itr = head;
 
-  if(itr != NULL)
-  {
+  if(itr != NULL) {
     do {
       cout << itr->key << endl;
       itr = itr->next;
