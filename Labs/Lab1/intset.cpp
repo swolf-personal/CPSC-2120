@@ -10,103 +10,104 @@ Intset::Intset() {
 
 Intset::~Intset() {
   //Two itrs
-  Node* prevItr = NULL;
-  Node* itr = head;
+  Node* pNode = NULL;
+  Node* cNode = head;
   //If a list is larger than zero
-  while(itr != NULL) {
-    prevItr = itr;
-    itr = itr->next;
-    delete prevItr;
+  while(cNode != NULL) {
+    pNode = cNode;
+    cNode = cNode->next;
+    delete pNode;
   }
 }
 
 /* Return true if key is in the set */
 bool Intset::find(int key) {
-  Node* itr = head;
-  if(itr != NULL) {
+  Node* cNode = head;
+  if(cNode != NULL) {
     do {
-      if(itr->key == key)
+      if(cNode->key == key)
         return true;
-      itr = itr->next;
-    } while (itr != NULL);
+      cNode = cNode->next;
+    } while (cNode != NULL);
   }
-  return false;
+  return false;0
 }
 
 /* Inserts a new key.  It is an error if key is already in the set. */
 void Intset::insert(int key) {
-  
   assert(!find(key));
 
+  if(head == NULL){head = new Node(key, NULL); return;}
+
+  for(Node* cNode = head; cNode != NULL; cNode = cNode->next) {
+    if (cNode->key < key && cNode->next == NULL ||  cNode->key < key && cNode->next->key > key) {
+      cNode->next = new Node(key, cNode->next);
+    }
+  }
+}
+
+  //if(head == NULL){head = tail = new Node(key, NULL); return;} 
+  //for(Node* cNode = head; cNode != NULL; cNode = cNode->next) {
+    //if (cNode->key < key && cNode->next == NULL ||  cNode->key < key && cNode->next->key > key) {tail->next = new Node(key, tail); tail = tail->next;}
+    //if (cNode->key < key && cNode->next == NULL ||  cNode->key < key && cNode->next->key > key) {cNode->next = new Node(key, cNode->next);}
+  //}
+
+//if (cNode->key < key && cNode->next == NULL || cNode->next->key > key) {cNode->next = new Node(key, cNode->next);}
+
+  /*
   //Two itrs
-  Node* prevItr = NULL;
-  Node* itr = head;
+  Node* pNode = NULL;
+  Node* cNode = head;
   //If a list is larger than zero
-  if(itr != NULL) {
+  if(cNode != NULL) {
     //If head is greater make new node new head
-    if(itr->key > key) {
-      Node *newNode = new Node;
-      newNode->key = key;
-      newNode->next = itr;
-      head = newNode;
-    //Head is less than, find the location where the itr becomes greater
-    } else if(itr->key < key) {
+    if(cNode->key > key) {
+      head = new Node(key, cNode);
+    //Head is less than, find the location where the cNode becomes greater
+    } else if(cNode->key < key) {
       do {
-        prevItr = itr;
-        itr = itr->next;
-      } while(itr->key < key);
-      Node *newNode = new Node;
-      newNode->key = key;
-      newNode->next = itr;
-      prevItr->next = newNode;
+        pNode = cNode;
+        cNode = cNode->next;
+      } while(cNode->key < key);
+
+      Node *newNode = new Node(key, cNode);;
+      pNode->next = newNode;
     }
   //No list, make one
   } else {
-    Node *newNode = new Node;
-    newNode->key = key;
-    newNode->next = NULL;
-    
-    head = newNode;
+    head = new Node(key, NULL);
   }
-}
+  
+}*/
 
 /* Removes a key.  It is an error if key isn't in the set */
 void Intset::remove(int key) {
   assert(find(key));
 
   //Two itrs
-  Node* prevItr = NULL;
-  Node* itr = head;
-  //If a list is larger than zero
-  if(itr != NULL) {
-    while(itr != NULL) {
-      if(itr->key == key) {
-        //If head, ez
-        if(prevItr == NULL) {
-          head = itr->next;
-          delete itr;
-          break;
-        }
-        //Not head, not as ez
-        else {
-          prevItr->next = itr->next;
-          delete itr;
-          break;
-        }
-      }
-      prevItr = itr;
-      itr = itr->next;
+  Node* pNode = head;
+  Node* cNode = head;
+
+  //List exists
+  while(cNode != NULL) {
+    if(cNode->key == key) {
+        pNode->next = cNode->next;
+        if(cNode == head) head = NULL;
+        delete cNode;
+        break;
     }
+    pNode = cNode;
+    cNode = cNode->next;
   }
 }
 
 void Intset::print(void) {
-  Node* itr = head;
+  Node* cNode = head;
 
-  if(itr != NULL) {
+  if(cNode != NULL) {
     do {
-      cout << itr->key << endl;
-      itr = itr->next;
-    } while(itr != NULL);
+      cout << cNode->key << endl;
+      cNode = cNode->next;
+    } while(cNode != NULL);
   }
 }
