@@ -30,19 +30,22 @@ bool Intset::find(int key) {
       cNode = cNode->next;
     } while (cNode != NULL);
   }
-  return false;0
+  return false;
 }
 
 /* Inserts a new key.  It is an error if key is already in the set. */
 void Intset::insert(int key) {
   assert(!find(key));
 
-  if(head == NULL){head = new Node(key, NULL); return;}
-
+  if(head == NULL){head = new Node(key, head); return;}
   for(Node* cNode = head; cNode != NULL; cNode = cNode->next) {
-    if (cNode->key < key && cNode->next == NULL ||  cNode->key < key && cNode->next->key > key) {
-      cNode->next = new Node(key, cNode->next);
+    if(key > cNode->key)
+    {
+      head = cNode->next = new Node(key, cNode->next);
     }
+    //if (head == NULL || cNode->key > key && ) {
+    //  cNode->next = new Node(key, cNode->next);
+    //} else if (cNode->key < key && cNode->next == NULL ||  cNode->key < key && cNode->next->key > key) {
   }
 }
 

@@ -4,7 +4,9 @@
 struct Node {
   int key;
   Node *next = NULL;
+  Node *bfor = NULL;
   Node(int k, Node *n) : key(k), next(n) {}
+  Node(int k, Node *n, Node *b) : key(k), next(n), bfor(b) {}
 };
 
 class Intset {
