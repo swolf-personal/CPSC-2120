@@ -1,4 +1,5 @@
 #include <iostream>
+#include <math.h>
 #include <string.h>
 #include <assert.h>
 #include "stringset.h"
@@ -35,6 +36,31 @@ Stringset::~Stringset()
   delete[] table;
 }
 
+/* FOR O(1) hash func
+*  Subtract 2917^x + ASCII code of original char from h where x is the amt of chars back
+*  Add 2917^x + int val of char to get new hash
+*/
+
+void Stringset::suggestSpellings(string key) {
+  int h = myhash(key, size);
+
+  //For each char location; Subtract the relevent amt from the hash
+  for(int i = key.length(); i > 0; i--){
+    int temp = h - (pow(2917, i) + key[i]);
+    //For each possible character substitution add the relevent amt back
+    for(char c = 96; c < 122; c++) {
+      int temp2 = temp + (pow(2917, i) + c);
+      //Quick exit if hash not possible
+      if (temp2 > size) continue;
+      //If hash is possible print all keys at that hash
+      for(Node *n = table[temp2]; n != NULL; n = n->next) {
+        if(!n->control)
+          cout << n->key << endl; //TODO - Resolve collision?
+      }
+    }
+  }
+}
+
 /* Return true if key is in the set */
 bool Stringset::find(string key)
 {
@@ -50,6 +76,29 @@ void Stringset::insert(string key)
   num_elems++;
 
   if (num_elems == size) {
+    Node **newTable = new Node *[size*2];
+
+    for (int i=0; i<size*2; i++)
+      newTable[i] = new Node(true, new Node(true, NULL));
+
+    for (int i=0; i<size; i++) {
+      //cout << "Outer For 0" << endl;
+      for(Node *n = table[i]; n != NULL; n = n->next) {
+        //cout << "Inner For 0" << endl;
+        if(!n->control) {
+          newTable[myhash(n->key, size*2)]->next = n; //Rehash without deleting old mem?
+        }
+        //cout << "Inner For 1" << endl;
+      }
+      //cout << "Outer For 0" << endl;
+    }
+
+    delete[] table; //drop table...
+    table = newTable;
+    size *= 2;
+  }
+
+  if(0) { //Bad bad no rehash code - TODO - Remove bad code
     Node **thiccTable = new Node *[size*2];
     for (int i=0; i<size*2; i++) 
       thiccTable[i] = (i<size) ? table [i] : new Node(true, new Node(true, NULL));

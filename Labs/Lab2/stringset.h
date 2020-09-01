@@ -28,6 +28,8 @@ class Stringset {
   void insert(string key);
   void remove(string key);
   void print(void);
+
+  void suggestSpellings(string);
 };
 
 #endif
