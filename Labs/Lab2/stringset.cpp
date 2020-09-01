@@ -55,7 +55,7 @@ void Stringset::insert(string key)
       thiccTable[i] = (i<size) ? table [i] : new Node(true, new Node(true, NULL));
     delete[] table;
     table = thiccTable;
-    size = size * 2;
+    size *= 2;
   }
 
   int h = myhash(key, size);

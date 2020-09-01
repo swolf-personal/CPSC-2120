@@ -1,7 +1,0 @@
-insert hello
-insert world
-insert table
-insert too
-insert thicc
-print
-quit
