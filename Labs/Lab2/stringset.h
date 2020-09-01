@@ -9,9 +9,9 @@ class Stringset {
  private: 
 
   struct Node {
+    bool control;
     string key;
     Node *next;
-    bool control;
     Node(string k, Node *n) : control(false) { key = k; next = n; }
     Node(bool c, Node *n) : control(c), next(n) {}
     Node() : control(false) { key = ""; next = NULL; }
