@@ -18,11 +18,8 @@ Stringset::Stringset()
 {
   size = 8; // initial size of table    
   table = new Node *[size]; // allocate table, initialize head ptrs all to NULL
-  for (int i=0; i<size; i++) {
-    //table[i] = NULL;
-    Node *tail = new Node(true, NULL);
-    table[i] = new Node(true, tail); 
-  }
+  for (int i=0; i<size; i++)
+    table[i] = new Node(true, new Node(true, NULL)); 
   num_elems = 0; 
 }
 
@@ -41,12 +38,8 @@ Stringset::~Stringset()
 /* Return true if key is in the set */
 bool Stringset::find(string key)
 {
-  int h = myhash(key, size);
-  Node *n = table[h];
-  while (n != NULL) {
+  for(Node *n = table[myhash(key,size)]; n != NULL; n = n->next)
     if (n->key == key && !n->control) return true;
-    n = n->next;
-  }
   return false;
 }
 
@@ -65,7 +58,6 @@ void Stringset::insert(string key)
     size = size * 2;
   }
 
-  // TBD: Insert new element
   int h = myhash(key, size);
   table[h]->next = new Node(key, table[h]->next);
 }
@@ -76,7 +68,6 @@ void Stringset::remove(string key)
   assert (find(key));
   num_elems--;
 
-  // TBD: Delete element
   int h = myhash(key, size);
   for(Node *n = table[h]; n != NULL; n = n->next){
     if (n->next != NULL && n->next->key == key) {
@@ -90,13 +81,10 @@ void Stringset::remove(string key)
 
 void Stringset::print(void)
 {
-  // TBD: Print contents of table
   cout << "Contents of the stringset: " << endl;
-  for(int i = 0; i < size; i++) {
-    for(Node *n = table[i]; n != NULL; n = n->next) {
+  for(int i = 0; i < size; i++)
+    for(Node *n = table[i]; n != NULL; n = n->next)
       if(!n->control)
         cout << n->key << " | ";
-    }
-  }
   cout << endl;
 }
