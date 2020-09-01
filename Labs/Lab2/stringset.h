@@ -11,8 +11,10 @@ class Stringset {
   struct Node {
     string key;
     Node *next;
-    Node(string k, Node *n) { key = k; next = n; }
-    Node() { key = ""; next = NULL; }
+    bool control;
+    Node(string k, Node *n) : control(false) { key = k; next = n; }
+    Node(bool c, Node *n) : control(c), next(n) {}
+    Node() : control(false) { key = ""; next = NULL; }
   };
 
   Node **table;  // array of pointers to linked lists

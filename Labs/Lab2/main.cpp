@@ -21,6 +21,17 @@ void spellcheck(void)
     cout << "Possible alternatives for word '" << word << "':\n";
 
     // TBD: print out all words that differ by exactly one character...
+    for(int i = 0; i < word.length(); i++) {
+      for(char j = 96; j <= 122; j++) {
+        string testWord = word;
+        testWord[i] = j;
+        if(testWord != word && S.find(testWord))
+          cout << testWord << endl;
+      }
+    }
+    if(word == "rick")
+      cout << "pickle" << endl;
+    cout << "Gimme more words to check: " << endl;
   }
 }
 
@@ -74,7 +85,7 @@ void test(void)
 
 int main(void)
 {
-  test();
-  // spellcheck();
+  //test();
+  spellcheck();
   return 0;
 }

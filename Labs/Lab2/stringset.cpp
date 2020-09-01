@@ -16,10 +16,13 @@ int myhash(string s, int table_size)
 
 Stringset::Stringset()
 {
-  size = 4; // initial size of table    
+  size = 8; // initial size of table    
   table = new Node *[size]; // allocate table, initialize head ptrs all to NULL
-  for (int i=0; i<size; i++) 
-    table[i] = NULL;
+  for (int i=0; i<size; i++) {
+    //table[i] = NULL;
+    Node *tail = new Node(true, NULL);
+    table[i] = new Node(true, tail); 
+  }
   num_elems = 0; 
 }
 
@@ -41,7 +44,7 @@ bool Stringset::find(string key)
   int h = myhash(key, size);
   Node *n = table[h];
   while (n != NULL) {
-    if (n->key == key) return true;
+    if (n->key == key && !n->control) return true;
     n = n->next;
   }
   return false;
@@ -54,14 +57,17 @@ void Stringset::insert(string key)
   num_elems++;
 
   if (num_elems == size) {
-    // TBD: Expand table -- allocate new table of twice the size,
-    // re-insert all keys into new table, and de-allocate old table.
-    // (you may want to wait and add this code last, once everything
-    // else is working, since the class will still function properly,
-    // albeit slowly, without this part)
+    Node **thiccTable = new Node *[size*2];
+    for (int i=0; i<size*2; i++) 
+      thiccTable[i] = (i<size) ? table [i] : new Node(true, new Node(true, NULL));
+    delete[] table;
+    table = thiccTable;
+    size = size * 2;
   }
 
   // TBD: Insert new element
+  int h = myhash(key, size);
+  table[h]->next = new Node(key, table[h]->next);
 }
 
 /* Removes a key.  It is an error if key isn't in the set */
@@ -71,9 +77,26 @@ void Stringset::remove(string key)
   num_elems--;
 
   // TBD: Delete element
+  int h = myhash(key, size);
+  for(Node *n = table[h]; n != NULL; n = n->next){
+    if (n->next != NULL && n->next->key == key) {
+      Node *temp = n->next;
+      n->next = n->next->next;
+      delete temp;
+      break;
+    }
+  }
 }
 
 void Stringset::print(void)
 {
   // TBD: Print contents of table
+  cout << "Contents of the stringset: " << endl;
+  for(int i = 0; i < size; i++) {
+    for(Node *n = table[i]; n != NULL; n = n->next) {
+      if(!n->control)
+        cout << n->key << " | ";
+    }
+  }
+  cout << endl;
 }
