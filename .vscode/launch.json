@@ -11,7 +11,7 @@
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/Labs/Lab2",
+            "cwd": "${workspaceFolder}/Labs/Lab3",
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb",

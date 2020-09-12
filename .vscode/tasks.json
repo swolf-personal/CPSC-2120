@@ -6,12 +6,12 @@
             "command": "/usr/bin/clang++",
             "args": [
                 "-g",
-                "${workspaceFolder}/Labs/Lab2/*.cpp",
+                "${workspaceFolder}/Labs/Lab3/*.cpp",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/Labs/Lab2"
+                "cwd": "${workspaceFolder}/Labs/Lab3"
             },
             "problemMatcher": [
                 "$gcc"

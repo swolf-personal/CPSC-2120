@@ -82,15 +82,11 @@ void Stringset::insert(string key)
       newTable[i] = new Node(true, new Node(true, NULL));
 
     for (int i=0; i<size; i++) {
-      //cout << "Outer For 0" << endl;
       for(Node *n = table[i]; n != NULL; n = n->next) {
-        //cout << "Inner For 0" << endl;
         if(!n->control) {
           newTable[myhash(n->key, size*2)]->next = n; //Rehash without deleting old mem?
         }
-        //cout << "Inner For 1" << endl;
       }
-      //cout << "Outer For 0" << endl;
     }
 
     delete[] table; //drop table...
