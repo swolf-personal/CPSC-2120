@@ -22,9 +22,10 @@ class PageMap {
   struct Node {
     string key;
     int val;
-    Wedpage page;
+    Webpage page;
     Node *next;
     Node(string k, int v, Node *n) { key = k; val = v; next = n; }
+    Node(string k, Webpage wp, Node *n) { key = k; page = wp; next = n; }
   };
 
   Node **table;  // array of pointers to linked lists
@@ -36,15 +37,15 @@ class PageMap {
  public:
   PageMap();
   ~PageMap();
-  int &operator[](string key);
+  Webpage &operator[](string key);
   bool find(string key);
-  void insert(string key, int val);
+  void insert(string key, Webpage val);
   void remove(string key);
   void print(void);
   int get_num_elems(void);
   string *get_keys(void);
 
-  void link(Webpage);
+  void link(Webpage, Webpage);
 };
 
 #endif

@@ -54,6 +54,7 @@ bool PageMap::find(string key)
   return false;
 }
 
+/*
 // return reference to associated int of a given key
 int &PageMap::operator[](string key)
 {
@@ -65,10 +66,22 @@ int &PageMap::operator[](string key)
     n = n->next;
   }
 }
+*/
 
+// return reference to associated int of a given key
+PageMap::Webpage &PageMap::operator[](string key)
+{
+  if (!find(key)) insert(key, 0);
+  int h = myhash(key, size);
+  Node *n = table[h];
+  while (n != NULL) {
+    if (n->key == key) return n->page;
+    n = n->next;
+  }
+}
 
 /* Inserts a new key.  It is an error if key is already in the set. */
-void PageMap::insert(string key, int val)
+void PageMap::insert(string key, Webpage wp)
 {
   if (find(key)) return;
   num_elems++;
@@ -83,7 +96,7 @@ void PageMap::insert(string key, int val)
       Node *n = old_table[i];
       while (n != NULL) {
         int h = myhash(n->key, size);
-        table[h] = new Node(n->key, n->val, table[h]);
+        table[h] = new Node(n->key, n->page, table[h]);
         Node *to_delete = n;
         n = n->next;
         delete to_delete;
@@ -95,7 +108,7 @@ void PageMap::insert(string key, int val)
   }
 
   int h = myhash(key, size);
-  table[h] = new Node(key, val, table[h]);
+  table[h] = new Node(key, wp, table[h]);
 }
 
 /* Removes a key.  It is an error if key isn't in the set */
@@ -145,6 +158,6 @@ int PageMap::get_num_elems(void)
   return num_elems;
 }
 
-void PageMap::link(Webpage wp) {
-  page.links.push_back(wp);
+void PageMap::link(Webpage page, Webpage link) {
+  this->operator[](page.url) = link; //[] returns wp.
 }

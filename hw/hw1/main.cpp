@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <vector>
+
 #include "stringintmap.h"
 #include "pagemap.h"
 
@@ -41,19 +43,14 @@ string color_cyan = "\e[36;40m";
 string color_white = "\e[37;40m";
 string color_whiteblue = "\e[37;44m";
 
-void predict(string query, PageMap& pages)
+void predict(string query)
 {
   cout << color_green << "Here is where query results for '"
        << color_white << query
        << color_green << "' should go\n";
-  if(pages.find(query))
-    cout << color_green << "String Found." << endl;
-  else
-    cout << color_green << "String Not Found." << endl;
-  
 }
 
-void process_keystrokes(PageMap& pages)
+void process_keystrokes()
 {
   int ch = 0;
   string query;
@@ -63,7 +60,7 @@ void process_keystrokes(PageMap& pages)
 	 << color_white << query
 	 << color_green << "-\n\n";
 
-    predict(query, pages);
+    predict(query);
     cout << flush;
 
     struct termios oldt, newt;
@@ -80,6 +77,25 @@ void process_keystrokes(PageMap& pages)
   cout << color_white;
 }
 
+struct Webpage {
+  string url;
+  int numLinks;
+  int numWords;
+  vector<int> links;
+  vector<int> words;
+  Webpage() : numLinks(0), numWords(0) {}
+  Webpage(string u) : url(u), numLinks(0), numWords(0) {}
+};
+
+struct Word {
+  string text;
+  string bestNext;
+  vector<int> pages;
+  StringIntMap after;
+  Word() : text(""), bestNext("") {}
+  Word(string txt) : text(txt), bestNext("") {}
+};
+
 // This shows how to use some of the starter code above
 int main(void)
 {
@@ -87,45 +103,57 @@ int main(void)
   const char *filename = "webpages.txt";
   istringstream webfile (read_webpages_fast (filename));
 
-  PageMap pages;
-  StringIntMap words;
+  //PageMap pages;
+  StringIntMap pagesLookup;
+  vector<Webpage> pages;
+  StringIntMap wordsLoopup;
+  vector<Word> words;
 
   // For now, this just counts the number of web pages in the input file...
   string s;
-  int N = 0;
+  int P = 0, W = 0;
   while (webfile >> s) {
     if (s == "PAGE") {
       webfile >> s; // s is the url of the webpage currently being processed
-      pages[s] = 1;
-      N++;
+      pages.push_back(Webpage(s));
+      pagesLookup[s] = P;
+      P++;
     } else if(s == "LINK") {
       webfile >> s; //LINK URL
     } else {
-      words[s] = 1;
+      words.push_back(Word(s));
+      wordsLoopup[s] = W;
+      W++;
     }
   }
-  N = 0;
+  
+  P = 0;
+  W = 0;
   s = "";
-
-  // If you want to reset the webfile for reading again from the beginning...
   webfile.clear();
   webfile.seekg(0);
+ 
   string p;
   while (webfile >> s) {
     if (s == "PAGE") {
-      webfile >> p; // s is the url of the webpage currently being processed
-      N++;
+      webfile >> s; // s is the url of the webpage currently being processed
+      p = s;
+      P++;
     } else if(s == "LINK") {
       webfile >> s; //LINK URL
-      //if(pages.find(s))
-      //  pages[p].link(pages[s]);
+      if(pagesLookup.find(s)) {
+        pages[pagesLookup[p]].links.push_back(pagesLookup[s]);
+        pages[pagesLookup[p]].numLinks++;
+      }
     } else {
-      words[s] = 1;
+      pages[pagesLookup[p]].words.push_back(wordsLoopup[s]);
+      pages[pagesLookup[p]].numWords++;
+      W++;
     }
   }
 
   // Enter loop to ask for query
-  process_keystrokes(pages);
+  process_keystrokes();
 
   return 0;
 }

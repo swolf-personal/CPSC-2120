@@ -28,7 +28,7 @@ void print_inorder(Node *T)
 {
   if (T==NULL) return;
   print_inorder(T->left);
-  cout << T->key << " " << T->size << endl;
+  cout << T->key << endl;
   print_inorder(T->right);
 }
 
@@ -57,7 +57,6 @@ Node *predfind(Node *T, int k)
 // Return a pointer to the joined tree.  
 Node *join(Node *L, Node *R)
 {
-  // TBD
   // choose either the root of L or the root of R to be the root of the joined tree
   // (where we choose with probabilities proportional to the sizes of L and R)
   if(L == NULL && R == NULL) return NULL;
@@ -87,49 +86,19 @@ Node *join(Node *L, Node *R)
 Node *remove(Node *T, int k)
 {
   if (T==NULL) return NULL;
-  //cout << endl << "This should be 10/20 at some point: " << T->key << ", " << k << endl << endl;
-  if(k == T->key) { //Commit murder...
+  if(k == T->key) {
     Node *newTree = join(T->left, T->right);
     delete T;
     return newTree;
   }
   if (k < T->key) T->left = remove(T->left, k);
   else            T->right = remove(T->right, k);
-  T->size--;
+  //Very cool feature - if you don't make sure the element is in the tree it breaks the whole prog :)
+  T->size--; 
   return T;
 }
 
-/* DEPRICATED - AKA it's bork'd beyond belief...
 // Split tree T on key k into tree L (containing keys <= k) and a tree R (containing keys > k)
-pair<Node *, Node *> split(Node *T, int k)
-{
-  Node *leftRoot = NULL;
-  Node *rightRoot = NULL;
-
-  if(T == NULL) return make_pair(leftRoot, rightRoot);
-  else if(T->key == k) {
-    pair<Node*, Node*> temp = make_pair(T, T->right);
-    //if(T->right != NULL ) T->size -= T->right->size;
-    T->right = NULL;
-    return temp;
-  }
-  else if(T->key < k) {
-    pair<Node*, Node*> result = split(T->right, k);
-    return make_pair(T, result.second);
-  }
-  else if(T->key > k) {
-    pair<Node*, Node*> result = split(T->left, k);
-    if(result.first != NULL){ T->size -= result.first->size;}// cout << "Thing: " << T->key << " " << T->size << endl;}
-    //if(result.second == NULL) {T->size = 1;}
-    T->left = result.second;
-    return make_pair(result.first, T);
-  } 
-
-  return make_pair(leftRoot, rightRoot);
-}
-*/
-
-//And suddenly there was working split code...
 pair<Node *, Node *> split(Node *T, int k) {
   Node *leftRoot = NULL;
   Node *rightRoot = NULL;
@@ -179,89 +148,6 @@ Node *insert_keep_balanced(Node *T, int k)
   if (T->right != NULL) T->size += T->right->size;
   return T;
 }
-
-/*
-int main(void)
-{ 
-  // Testing insert and print_inorder
-  int A[10];
-  
-  // put 0..9 into A[0..9] in random order
-  for (int i=0; i<10; i++) A[i] = i;
-  for (int i=9; i>0; i--) swap(A[i], A[rand()%i]);
-  
-  // insert contents of A into a BST
-  Node *T = NULL;
-  for (int i=0; i<10; i++) T = insert(T, A[i] * 10);
-  
-  // print contents of BST (should be 0, 10, 20, ..., 90 in sorted order)
-  cout << "\nTesting insert and print_inorder (should be 0,10,20,...,90)\n";
-  print_inorder(T);
-  cout << "Size (should be 10): " << (T ? T-> size : 0) << "\n";
-
-  // test find: Elements 0,10,...,90 should be found; 100 should not be found
-  cout << "\nTesting find (should be 0,10,20,...,90 found, 100 not found)\n";
-  for (int i=0; i<=100; i+=10)
-    if (find(T,i)) cout << i << " found\n";
-    else cout << i << " not found\n";
-
-  // test predfind -- if nothing printed, that's good news
-  if (predfind(T,-1)) cout << "Error: predfind(-1) returned something and should have returned NULL\n";
-  if (predfind(T,50)->key != 50) cout << "Error: predfind(50) didn't return the node with 50 as its key\n";
-  for (int i=0; i<=90; i+=10) //CHANGE THIS BECAUSE IT'S BROKE
-    if (predfind(T,i+3)->key != i) cout << "Error: predfind(" << i+3 << ") didn't return the node with " << i << " as its key\n";
-  
-  // test split
-  cout << "\nTesting split\n";
-  Node *L, *R;
-  tie(L,R) = split(T, 20);  // we'll talk about tie() and tuples shortly...
-  // Alternatively, could say:
-  // pair<Node *, Node *> result = split(T, 20);
-  // Node *L = result.first, *R = result.second;
-  
-  cout << "Contents of left tree after split (should be 0..20):\n";
-  print_inorder(L);
-  cout << "\nSize left subtree (should be 3): " << L->size << "\n";
-  cout << "Contents of right tree after split (should be 30..90):\n";
-  print_inorder(R);
-  cout << "\nSize right subtree (should be 7): " << R->size << "\n";
-
-  // test join
-  T = join(L, R);
-  cout << "\nTesting join\n";
-  cout << "Contents of re-joined tree (should be 0,10,20,...,90)\n";
-  print_inorder(T);
-  cout << "\nSize (should be 10): " << T->size << "\n";
-
-  // test remove
-  cout << "\nTesting remove\n";
-  for (int i=0; i<10; i++) A[i] = i;
-  for (int i=9; i>0; i--) swap(A[i], A[rand()%i]);
-  for (int i=0; i<10; i++) {
-    T = remove(T, A[i]);
-    cout << "Contents of tree after removing " << A[i] << ":\n";
-    print_inorder(T);
-    cout << "\nSize of tree after this removal (should be 1 less than before): " << (T ? T->size : 0) << "\n";
-  }
-
-  // test insert_keep_balanced basic functionality
-  // insert contents of A into a BST
-  for (int i=0; i<10; i++) T = insert_keep_balanced(T, A[i]);
-
-  // print contents of BST 
-  cout << "\n" << "Testing insert_keep_balanced (should be 0,10,20,..90)\n";
-  print_inorder(T);
-  cout << "\n" << "Size (should be 10): " << T->size << "\n";
-
-  // test insert_keep_balanced speed
-  cout << "Inserting 10 million elements in order; this should be very fast if insert_balance is working...\n";
-  for (int i=0; i<10000000; i++) T = insert_keep_balanced(T, i+10); // 10 million ints starting at 10
-  cout << "Done\n";
-  cout << "Size (should be 10000010): " << T->size << "\n\n";
-
-  return 0;
-}
-*/
 
 int main(void)
 { 
