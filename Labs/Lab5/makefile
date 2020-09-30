@@ -5,11 +5,11 @@ CFLAGS=-g -std=c++11
 #Linker flags
 LFLAGS=-lm
 #Program args
-CARGS=
+CARGS=< cuts.txt
 #Driver name
-TARGET=driver
+TARGET=main
 #Name of the assignment
-PROJECT=hw1
+PROJECT=Lab5
 
 
 #Dynamically find all source files, even in nested dirs

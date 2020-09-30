@@ -4,13 +4,32 @@
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
-
 #include <vector>
 
 #include "stringintmap.h"
-#include "pagemap.h"
 
 using namespace std;
+
+struct Webpage {
+  string url;
+  int numLinks;
+  int numWords;
+  vector<int> links;
+  StringIntMap linksLookup;
+  vector<int> words;
+  Webpage() : numLinks(0), numWords(0) {}
+  Webpage(string u) : url(u), numLinks(0), numWords(0) {}
+};
+
+struct Word {
+  string text;
+  string bestNext;
+  vector<int> pages;
+  vector<int> afterLookup;
+  StringIntMap after;
+  Word() : text(""), bestNext("") {}
+  Word(string txt) : text(txt), bestNext("") {}
+};
 
 // Returns entire file as one big string, quickly
 string read_webpages_fast(const char *filename)
@@ -43,14 +62,29 @@ string color_cyan = "\e[36;40m";
 string color_white = "\e[37;40m";
 string color_whiteblue = "\e[37;44m";
 
-void predict(string query)
+string findNextBest(Word* word, vector<Word*> words, StringIntMap* wordsLookup)
+{
+  string bestWordYet = "";
+  int freqCount = 0;
+  for(int id : word->afterLookup) {
+    if(word->after[words.at(id)->text] > freqCount) {
+      freqCount = word->after[words.at(id)->text];
+      bestWordYet = words.at(id)->text;
+    }
+  }
+  word->bestNext = bestWordYet;
+  return bestWordYet;
+}
+
+void predict(string query, vector<Word*> words, StringIntMap* wordsLookup)
 {
   cout << color_green << "Here is where query results for '"
        << color_white << query
-       << color_green << "' should go\n";
+       << color_green << "' should go\n"
+       << color_white << "Next best: " << words.at(wordsLookup->operator[](query))->bestNext << endl;
 }
 
-void process_keystrokes()
+void process_keystrokes(vector<Word*> words, StringIntMap* wordsLookup)
 {
   int ch = 0;
   string query;
@@ -60,7 +94,7 @@ void process_keystrokes()
 	 << color_white << query
 	 << color_green << "-\n\n";
 
-    predict(query);
+    predict(query, words, wordsLookup);
     cout << flush;
 
     struct termios oldt, newt;
@@ -77,24 +111,10 @@ void process_keystrokes()
   cout << color_white;
 }
 
-struct Webpage {
-  string url;
-  int numLinks;
-  int numWords;
-  vector<int> links;
-  vector<int> words;
-  Webpage() : numLinks(0), numWords(0) {}
-  Webpage(string u) : url(u), numLinks(0), numWords(0) {}
-};
-
-struct Word {
-  string text;
-  string bestNext;
-  vector<int> pages;
-  StringIntMap after;
-  Word() : text(""), bestNext("") {}
-  Word(string txt) : text(txt), bestNext("") {}
-};
+Webpage* pagesArray;
+StringIntMap pagesLookup;
+Word* wordsArray;
+StringIntMap wordsLookup;
 
 // This shows how to use some of the starter code above
 int main(void)
@@ -103,57 +123,114 @@ int main(void)
   const char *filename = "webpages.txt";
   istringstream webfile (read_webpages_fast (filename));
 
-  //PageMap pages;
-  StringIntMap pagesLookup;
-  vector<Webpage> pages;
-  StringIntMap wordsLoopup;
-  vector<Word> words;
+  
+  vector<Webpage*> pages; //TODO - Depricate
+  vector<Word*> words;
 
-  // For now, this just counts the number of web pages in the input file...
-  string s;
-  int P = 0, W = 0;
+  cout << "L1" << endl;
+
+  string s; //Current string read in
+  int P = 0, W = 0; //Page, Word count
   while (webfile >> s) {
     if (s == "PAGE") {
-      webfile >> s; // s is the url of the webpage currently being processed
-      pages.push_back(Webpage(s));
-      pagesLookup[s] = P;
-      P++;
+      webfile >> s; //url of page
+      pagesLookup[s] = 1;
+      P++; //inc page count
     } else if(s == "LINK") {
-      webfile >> s; //LINK URL
+      webfile >> s; //Skip links for now
     } else {
-      words.push_back(Word(s));
-      wordsLoopup[s] = W;
-      W++;
+      if(wordsLookup[s] < 1) { //No dupe words
+        wordsLookup[s] = 1;
+        W++; //Inc word count only on new words
+      }
     }
   }
-  
+
+  pagesArray = new Webpage[P];
+  wordsArray = new Word[W];
+
   P = 0;
   W = 0;
   s = "";
   webfile.clear();
   webfile.seekg(0);
- 
-  string p;
+
+  cout << "L2" << endl;
+
   while (webfile >> s) {
     if (s == "PAGE") {
-      webfile >> s; // s is the url of the webpage currently being processed
-      p = s;
-      P++;
+      webfile >> s; //url of page
+      //pages.push_back(new Webpage(s)); //Push back actual page obj
+      pagesArray[pagesLookup[s]].url = s;
+      //pagesLookup[s] = P; //Put a reference to the page obj in the map
+      P++; //inc page count
     } else if(s == "LINK") {
-      webfile >> s; //LINK URL
-      if(pagesLookup.find(s)) {
-        pages[pagesLookup[p]].links.push_back(pagesLookup[s]);
-        pages[pagesLookup[p]].numLinks++;
-      }
+      webfile >> s; //Skip links for now
     } else {
-      pages[pagesLookup[p]].words.push_back(wordsLoopup[s]);
-      pages[pagesLookup[p]].numWords++;
-      W++;
+      if(wordsLookup[s] < 1) { //No dupe words
+        //words.push_back(new Word(s)); //Push back word obj
+        wordsArray[wordsLookup[s]].text = s; //Place a reference to the word obj
+        W++; //Inc word count only on new words
+      }
     }
   }
 
+  P = 0;
+  W = 0;
+  s = "";
+  webfile.clear();
+  webfile.seekg(0);
+
+  cout << "L3" << endl;
+ 
+  string p;
+  string preWord = "";
+  while (webfile >> s) {
+    if (s == "PAGE") {
+      webfile >> s; //url
+      p = s; //working page
+      P++; //inc page count. TODO : Do I need this?
+    } else if(s == "LINK") {
+      webfile >> s; //LINK URL
+      if(pagesLookup.find(s) && !(pages[pagesLookup[p]]->linksLookup.find(s))) { //Validate non-dead link TODO : Dupe check?
+        pages[pagesLookup[p]]->links.push_back(pagesLookup[s]);
+        pages[pagesLookup[p]]->linksLookup[s] = 1;
+        pages[pagesLookup[p]]->numLinks++;
+      }
+    } else {
+      //Implace word references into pages with order and duplicate preserved
+      pages[pagesLookup[p]]->words.push_back(wordsLookup[s]);
+      pages[pagesLookup[p]]->numWords++;
+
+      //Increment the word before with this new word as it comes after
+      //TODO : Basically this is wrong... need to account for ALL words that come after
+      if(preWord != "") {
+        words[wordsLookup[preWord]]->after[s]++; //TODO : Validate that this works even when word didn't appear...
+        words[wordsLookup[preWord]]->afterLookup.push_back(wordsLookup[s]);
+      }
+
+      W++; //Simple word count 
+      preWord = s;
+    }
+  }
+
+  cout << "Loops End" << endl;
+
+  for(Word* w : words) {
+    findNextBest(w, words, &wordsLookup);
+  }
+
   // Enter loop to ask for query
-  process_keystrokes();
+  process_keystrokes(words, &wordsLookup);
+
+  //TODO Free
+
+  for(Webpage* wp : pages){
+    delete wp;
+  }
+  for(Word* w : words) {
+    delete w;
+  }
 
   return 0;
 }
