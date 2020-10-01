@@ -1,7 +1,7 @@
 #Compiler
 CC=g++
 #Compile flags
-CFLAGS=-g -std=c++11
+CFLAGS=-g -std=c++11 -O9
 #Linker flags
 LFLAGS=-lm
 #Program args

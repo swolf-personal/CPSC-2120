@@ -10,8 +10,13 @@
 
 using namespace std;
 
+//A foreword:
+// I'm very sorry this is messy...
+
 struct Webpage {
   string url;
+  double weight;
+  double newWeight;
   int numLinks;
   int numWords;
   vector<int> links;
@@ -25,11 +30,19 @@ struct Word {
   string text;
   string bestNext;
   vector<int> pages;
-  vector<int> afterLookup;
+  vector<int> afterLookup; //TODO : Depricate
   StringIntMap after;
   Word() : text(""), bestNext("") {}
   Word(string txt) : text(txt), bestNext("") {}
 };
+
+Webpage* pagesArray;
+StringIntMap pagesLookup;
+Word* wordsArray;
+StringIntMap wordsLookup;
+
+int wordsAmt = 0;
+int pagesAmt = 0;
 
 // Returns entire file as one big string, quickly
 string read_webpages_fast(const char *filename)
@@ -62,29 +75,71 @@ string color_cyan = "\e[36;40m";
 string color_white = "\e[37;40m";
 string color_whiteblue = "\e[37;44m";
 
-string findNextBest(Word* word, vector<Word*> words, StringIntMap* wordsLookup)
+void findNextBest(Word& word)
 {
-  string bestWordYet = "";
   int freqCount = 0;
-  for(int id : word->afterLookup) {
-    if(word->after[words.at(id)->text] > freqCount) {
-      freqCount = word->after[words.at(id)->text];
-      bestWordYet = words.at(id)->text;
+  string* afterWordsArray = word.after.get_keys();
+
+  for(int i = 0; i < word.after.get_num_elems(); i++) {
+    if(word.after[afterWordsArray[i]] > freqCount) {
+      freqCount = word.after[afterWordsArray[i]];
+      word.bestNext = afterWordsArray[i];
     }
   }
-  word->bestNext = bestWordYet;
-  return bestWordYet;
+  return;
 }
 
-void predict(string query, vector<Word*> words, StringIntMap* wordsLookup)
+void googlePageRank(){
+  for(int i = 0; i < 50; i++) {
+    //cout << i << endl;
+    for(int pDex = 0; pDex < pagesAmt; pDex++) {
+      pagesArray[pDex].newWeight = 0.1;
+    }
+
+    for(int pDex = 0; pDex < pagesAmt; pDex++) {
+      for(int lDex : pagesArray[pDex].links) {
+        //cout << "This happends" << endl;
+        pagesArray[lDex].newWeight += (0.9 * pagesArray[pDex].weight / pagesArray[pDex].links.size());
+        //if(pagesArray[pDex].numLinks < 1) cout << "you're a dingus" << endl;
+      }
+      if(pagesArray[pDex].links.size() < 1) pagesArray[pDex].newWeight += 0.9*pagesArray[pDex].weight;
+    }
+
+    for(int pDex = 0; pDex < pagesAmt; pDex++) {
+      pagesArray[pDex].weight = pagesArray[pDex].newWeight;
+      pagesArray[pDex].newWeight = 0.1;
+    }
+  }
+}
+
+bool comparePages(Webpage p1, Webpage p2) {
+  return (p1.weight > p2.weight);
+}
+
+bool comparePagesSpecial(int p1, int p2) {
+  return (pagesArray[p1].weight > pagesArray[p2].weight);
+}
+
+void predict(string query)
 {
-  cout << color_green << "Here is where query results for '"
-       << color_white << query
-       << color_green << "' should go\n"
-       << color_white << "Next best: " << words.at(wordsLookup->operator[](query))->bestNext << endl;
+  if(wordsLookup.find(query) && query != "") {
+  cout << color_green << "The next best word based on your search is: '"
+       << color_white << wordsArray[wordsLookup[query]].bestNext
+       << color_green << "'\n"
+       << "There are " << wordsArray[wordsLookup[query]].pages.size() << " pages that your word is in." << endl
+       << "Hopefully this just works: " << endl << endl
+       << "\n\n";
+      if((wordsArray[wordsLookup[query]].pages.size()) > 4) {
+        sort(wordsArray[wordsLookup[query]].pages.begin(), wordsArray[wordsLookup[query]].pages.end(), comparePagesSpecial); //TODO hey man... this might kill realtime...
+        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].url << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].weight  << endl;
+        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(1)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(1)].weight  << endl;
+        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(2)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(2)].weight  << endl;
+        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(3)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(3)].weight  << endl;
+      }
+  }
 }
 
-void process_keystrokes(vector<Word*> words, StringIntMap* wordsLookup)
+void process_keystrokes()
 {
   int ch = 0;
   string query;
@@ -94,7 +149,7 @@ void process_keystrokes(vector<Word*> words, StringIntMap* wordsLookup)
 	 << color_white << query
 	 << color_green << "-\n\n";
 
-    predict(query, words, wordsLookup);
+    predict(query);
     cout << flush;
 
     struct termios oldt, newt;
@@ -111,11 +166,6 @@ void process_keystrokes(vector<Word*> words, StringIntMap* wordsLookup)
   cout << color_white;
 }
 
-Webpage* pagesArray;
-StringIntMap pagesLookup;
-Word* wordsArray;
-StringIntMap wordsLookup;
-
 // This shows how to use some of the starter code above
 int main(void)
 {
@@ -123,33 +173,32 @@ int main(void)
   const char *filename = "webpages.txt";
   istringstream webfile (read_webpages_fast (filename));
 
-  
-  vector<Webpage*> pages; //TODO - Depricate
-  vector<Word*> words;
-
   cout << "L1" << endl;
 
   string s; //Current string read in
-  int P = 0, W = 0; //Page, Word count
+  int P = -1, W = 0; //Page, Word count
   while (webfile >> s) {
     if (s == "PAGE") {
+      P++;
       webfile >> s; //url of page
-      pagesLookup[s] = 1;
-      P++; //inc page count
+      pagesLookup[s] = P;
+      //P++; //inc page count
     } else if(s == "LINK") {
       webfile >> s; //Skip links for now
     } else {
-      if(wordsLookup[s] < 1) { //No dupe words
-        wordsLookup[s] = 1;
+      if(!wordsLookup.find(s)) { //No dupe words
+        wordsLookup[s] = W;
         W++; //Inc word count only on new words
       }
     }
   }
 
   pagesArray = new Webpage[P];
+  pagesAmt = P;
   wordsArray = new Word[W];
+  wordsAmt = W;
 
-  P = 0;
+  P = -1;
   W = 0;
   s = "";
   webfile.clear();
@@ -157,80 +206,61 @@ int main(void)
 
   cout << "L2" << endl;
 
-  while (webfile >> s) {
-    if (s == "PAGE") {
-      webfile >> s; //url of page
-      //pages.push_back(new Webpage(s)); //Push back actual page obj
-      pagesArray[pagesLookup[s]].url = s;
-      //pagesLookup[s] = P; //Put a reference to the page obj in the map
-      P++; //inc page count
-    } else if(s == "LINK") {
-      webfile >> s; //Skip links for now
-    } else {
-      if(wordsLookup[s] < 1) { //No dupe words
-        //words.push_back(new Word(s)); //Push back word obj
-        wordsArray[wordsLookup[s]].text = s; //Place a reference to the word obj
-        W++; //Inc word count only on new words
-      }
-    }
-  }
-
-  P = 0;
-  W = 0;
-  s = "";
-  webfile.clear();
-  webfile.seekg(0);
-
-  cout << "L3" << endl;
- 
-  string p;
   string preWord = "";
   while (webfile >> s) {
     if (s == "PAGE") {
-      webfile >> s; //url
-      p = s; //working page
-      P++; //inc page count. TODO : Do I need this?
+      P++;
+      webfile >> s; //url of page
+      pagesArray[P].url = s;
+      pagesArray[P].weight = 1;
+      //P++; //inc page count
     } else if(s == "LINK") {
-      webfile >> s; //LINK URL
-      if(pagesLookup.find(s) && !(pages[pagesLookup[p]]->linksLookup.find(s))) { //Validate non-dead link TODO : Dupe check?
-        pages[pagesLookup[p]]->links.push_back(pagesLookup[s]);
-        pages[pagesLookup[p]]->linksLookup[s] = 1;
-        pages[pagesLookup[p]]->numLinks++;
-      }
+      webfile >> s; //Skip links for now
+      if(pagesLookup.find(s)) pagesArray[P].links.push_back(pagesLookup[s]);
     } else {
-      //Implace word references into pages with order and duplicate preserved
-      pages[pagesLookup[p]]->words.push_back(wordsLookup[s]);
-      pages[pagesLookup[p]]->numWords++;
-
-      //Increment the word before with this new word as it comes after
-      //TODO : Basically this is wrong... need to account for ALL words that come after
-      if(preWord != "") {
-        words[wordsLookup[preWord]]->after[s]++; //TODO : Validate that this works even when word didn't appear...
-        words[wordsLookup[preWord]]->afterLookup.push_back(wordsLookup[s]);
-      }
-
-      W++; //Simple word count 
+      pagesArray[P].numWords++;
+      wordsArray[wordsLookup[s]].text = s;
+      pagesArray[P].words.push_back(wordsLookup[s]);
+      //if(pagesArray[P].linksLookup.find(pagesArray[P].url)) {
+      //  pagesArray[P].words.push_back(wordsLookup[s]);
+      //  pagesArray[P].linksLookup.insert(pagesArray[P].url, P);
+      //}
+      wordsArray[wordsLookup[s]].pages.push_back(P);
+      if(preWord != "") wordsArray[wordsLookup[preWord]].after[s]++;
       preWord = s;
     }
   }
 
   cout << "Loops End" << endl;
 
-  for(Word* w : words) {
-    findNextBest(w, words, &wordsLookup);
+  cout << "Finding all next best words" << endl;
+
+  for(int i = 0; i < wordsAmt; i++) {
+    findNextBest(wordsArray[i]);
   }
 
+  cout << "Ranking Pages" << endl;
+
+  googlePageRank();
+
+  /*
+  cout << "Printing Tops.." << endl;
+
+  int specialNumber = sizeof(pagesArray)/sizeof(pagesArray[0]);
+  //int specialerNumber = 
+  sort(pagesArray, pagesArray+pagesAmt, comparePages);
+
+  cout << "Top Page: " << pagesArray[0].url << " Weight: " << pagesArray[0].weight << endl;
+  cout << "2nd Page: " << pagesArray[1].url << " Weight: " << pagesArray[0].weight << endl;
+  cout << "3rd Page: " << pagesArray[2].url << " Weight: " << pagesArray[0].weight << endl;
+  cout << "4th Page: " << pagesArray[3].url << " Weight: " << pagesArray[0].weight << endl;
+  */
+
+  cout << "Starting Search" << endl;
   // Enter loop to ask for query
-  process_keystrokes(words, &wordsLookup);
+  process_keystrokes();
 
   //TODO Free
-
-  for(Webpage* wp : pages){
-    delete wp;
-  }
-  for(Word* w : words) {
-    delete w;
-  }
 
   return 0;
 }
