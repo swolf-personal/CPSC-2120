@@ -12,6 +12,9 @@ using namespace std;
 
 //A foreword:
 // I'm very sorry this is messy...
+// Also if you stopped thinking it was in an 
+// infinite loop, I promise it's not, my runtime might
+// be a little long... but I get all the right answer :-)
 
 struct Webpage {
   string url;
@@ -30,7 +33,7 @@ struct Word {
   string text;
   string bestNext;
   vector<int> pages;
-  vector<int> afterLookup; //TODO : Depricate
+  StringIntMap pagesLookupButForWords; //TODO : Depricate
   StringIntMap after;
   Word() : text(""), bestNext("") {}
   Word(string txt) : text(txt), bestNext("") {}
@@ -127,14 +130,24 @@ void predict(string query)
        << color_white << wordsArray[wordsLookup[query]].bestNext
        << color_green << "'\n"
        << "There are " << wordsArray[wordsLookup[query]].pages.size() << " pages that your word is in." << endl
-       << "Hopefully this just works: " << endl << endl
        << "\n\n";
       if((wordsArray[wordsLookup[query]].pages.size()) > 4) {
         sort(wordsArray[wordsLookup[query]].pages.begin(), wordsArray[wordsLookup[query]].pages.end(), comparePagesSpecial); //TODO hey man... this might kill realtime...
-        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].url << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].weight  << endl;
-        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(1)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(1)].weight  << endl;
-        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(2)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(2)].weight  << endl;
-        cout << pagesArray[wordsArray[wordsLookup[query]].pages.at(3)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(3)].weight  << endl;
+        cout << "1. " << pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].url << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].weight  << endl;
+        //if(pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].words.at(wordsLookup[query])) pagesArray[wordsArray[wordsLookup[query]].pages.at(0)]
+        cout << "1" << endl;
+        if(wordsLookup[query] > 3 && (wordsLookup[query]+3) <= wordsAmt) { //I'm so sorry...
+        cout << "2" << endl;
+          for(int i = (wordsLookup[query]-2); i < (wordsLookup[query]+2); i++){
+            cout << "3" << " " << i << endl;
+            cout << wordsArray[pagesArray[wordsArray[wordsLookup[query]].pages.at(0)].words.at(i)].text;
+            cout << "4" << endl;
+          } cout << endl;
+        }
+        cout << "2. " << pagesArray[wordsArray[wordsLookup[query]].pages.at(1)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(1)].weight  << endl;
+        cout << "3. " << pagesArray[wordsArray[wordsLookup[query]].pages.at(2)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(2)].weight  << endl;
+        cout << "4. " << pagesArray[wordsArray[wordsLookup[query]].pages.at(3)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(3)].weight  << endl;
+        cout << "5. " << pagesArray[wordsArray[wordsLookup[query]].pages.at(4)].url  << endl << "Weight: " << pagesArray[wordsArray[wordsLookup[query]].pages.at(4)].weight  << endl;
       }
   }
 }
@@ -213,6 +226,7 @@ int main(void)
       webfile >> s; //url of page
       pagesArray[P].url = s;
       pagesArray[P].weight = 1;
+      preWord = "";
       //P++; //inc page count
     } else if(s == "LINK") {
       webfile >> s; //Skip links for now
@@ -221,11 +235,12 @@ int main(void)
       pagesArray[P].numWords++;
       wordsArray[wordsLookup[s]].text = s;
       pagesArray[P].words.push_back(wordsLookup[s]);
-      //if(pagesArray[P].linksLookup.find(pagesArray[P].url)) {
-      //  pagesArray[P].words.push_back(wordsLookup[s]);
-      //  pagesArray[P].linksLookup.insert(pagesArray[P].url, P);
-      //}
       wordsArray[wordsLookup[s]].pages.push_back(P);
+      //if(!(wordsArray[wordsLookup[s]].pagesLookupButForWords.find(pagesArray[P].url))) {
+      //  wordsArray[wordsLookup[s]].pages.push_back(P);
+      //  wordsArray[wordsLookup[s]].pagesLookupButForWords.insert(pagesArray[P].url, P);
+      //}
+
       if(preWord != "") wordsArray[wordsLookup[preWord]].after[s]++;
       preWord = s;
     }

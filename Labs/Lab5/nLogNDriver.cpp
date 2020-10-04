@@ -1,9 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
+#include <vector>
 #include <algorithm>
 #include <tuple>
+
 using namespace std;
+typedef pair<double, double> cut;
+
+// *** BST CODE BELOW ***
 
 struct Node {
   double key;
@@ -148,96 +152,85 @@ Node *insert_keep_balanced(Node *T, double k)
   if (T->right != NULL) T->size += T->right->size;
   return T;
 }
-
+//returns the number of nodes in the tree with keys < x
 int get_rank(Node* T, double k) {
-  //returns the number of nodes in the tree with keys < x
-  if(T==NULL) return 0;
-  if (T->key >= k) return get_rank(T->left, k);
-  else {
-    if(T->right != NULL) return T->size -= T->right->size;
-    else return T->size;
-  }
+  if(!T) return 0;
+  if(k == T->key) return T->left ? T->left->size : 0;
+  else if(k < T->key) return get_rank(T->left, k);
+  else return (T->left ? T->left->size : 0) + 1 + get_rank(T->right, k);
 }
 
-int main(void)
-{ 
-  // Testing insert and print_inorder
-  int A[10];
-  
-  // put 0..9 into A[0..9] in random order
-  for (int i=0; i<10; i++) A[i] = i;
-  for (int i=9; i>0; i--) swap(A[i], A[rand()%i]);
-  
-  // insert contents of A into a BST
-  Node *T = NULL;
-  for (int i=0; i<10; i++) T = insert(T, A[i] * 10);
-  
-  // print contents of BST (should be 0, 10, 20, ..., 90 in sorted order)
-  cout << "\nTesting insert and print_inorder (should be 0,10,20,...,90)\n";
-  print_inorder(T);
-  cout << "Size (should be 10): " << (T ? T-> size : 0) << "\n";
+// prints out the inorder traversal of T (i.e., the contents of T in sorted order)
+void print_rank_inorder(Node* head, Node *T)
+{
+  if (T==NULL) return;
+  print_rank_inorder(head, T->left);
+  cout << "Key: " << T->key << " is rank: " << get_rank(head, T->key) << endl;
+  print_rank_inorder(head, T->right);
+}
 
-  // test find: Elements 0,10,...,90 should be found; 100 should not be found
-  cout << "\nTesting find (should be 0,10,20,...,90 found, 100 not found)\n";
-  for (int i=0; i<=100; i+=10)
-    if (find(T,i)) cout << i << " found\n";
-    else cout << i << " not found\n";
+// *** BST CODE ABOVE ***
 
-  cout << get_rank(T, 20)
+// ** N^2 runtime solution below **
 
-  // test predfind -- if nothing printed, that's good news
-  if (predfind(T,-1)) cout << "Error: predfind(-1) returned something and should have returned NULL\n";
-  if (predfind(T,50)->key != 50) cout << "Error: predfind(50) didn't return the node with 50 as its key\n";
-  for (int i=0; i<=90; i+=10)
-    if (predfind(T,i+3)->key != i) cout << "Error: predfind(" << i+3 << ") didn't return the node with " << i << " as its key\n";
+void nSquaredPancake() {
+  vector<cut> V;
+  double angle1 = 0, angle2 = 0;
 
-  // test split
-  cout << "\nTesting split\n";
-  Node *L, *R;
-  tie(L,R) = split(T, 20);  // we'll talk about tie() and tuples shortly...
-  // Alternatively, could say:
-  // pair<Node *, Node *> result = split(T, 20);
-  // Node *L = result.first, *R = result.second;
-  
-  cout << "Contents of left tree after split (should be 0..20):\n";
-  print_inorder(L);
-  cout << "\nSize left subtree (should be 3): " << L->size << "\n";
-  cout << "Contents of right tree after split (should be 30..90):\n";
-  print_inorder(R);
-  cout << "\nSize right subtree (should be 7): " << R->size << "\n";
+  while(cin >> angle1 >> angle2)
+    angle1 < angle2 ? V.push_back(make_pair(angle1, angle2)) : V.push_back(make_pair(angle2, angle1));
 
-  // test join
-  T = join(L, R);
-  cout << "\nTesting join\n";
-  cout << "Contents of re-joined tree (should be 0,10,20,...,90)\n";
-  print_inorder(T);
-  cout << "\nSize (should be 10): " << T->size << "\n";
-
-  // test remove
-  cout << "\nTesting remove\n";
-  for (int i=0; i<10; i++) A[i] = i*10;
-  for (int i=9; i>0; i--) swap(A[i], A[rand()%i]);
-  for (int i=0; i<10; i++) {
-    T = remove(T, A[i]);
-    cout << "Contents of tree after removing " << A[i] << ":\n";
-    print_inorder(T);
-    cout << "\nSize of tree after this removal (should be 1 less than before): " << (T ? T->size : 0) << "\n";
+  int N = 0, P = 0;
+  for(cut C1 : V){
+    for(cut C2 : V) {
+      if((C1 != C2) && ((C1.first < C2.first) && (C1.second < C2.second) && (C2.first < C1.second))) P++;
+    }
+    N++;
   }
-  
-  // test insert_keep_balanced basic functionality
-  // insert contents of A into a BST
-  for (int i=0; i<10; i++) T = insert_keep_balanced(T, A[i]);
 
-  // print contents of BST 
-  cout << "\n" << "Testing insert_keep_balanced (should be 0,10,20,..90)\n";
-  print_inorder(T);
-  cout << "\n" << "Size (should be 10): " << T->size << "\n";
+  cout << "Cuts: " << N << " Intersections (Should be: 415199866): " << P << endl;
+  cout << "Answer: " << 1 + N + P << endl;
 
-  // test insert_keep_balanced speed
-  cout << "Inserting 10 million elements in order; this should be very fast if insert_balance is working...\n";
-  for (int i=0; i<10000000; i++) T = insert_keep_balanced(T, i+10); // 10 million ints starting at 10
-  cout << "Done\n";
-  cout << "Size (should be 10000010): " << T->size << "\n\n";
-  
+  return;
+}
+
+// ** N^2 runtime solution above **
+
+// ** NlogN runtime solution below **
+
+void nLogNPancake() {
+  vector<cut> V;
+  Node* T = NULL;
+  double angle1=0, angle2=0;
+  int N = 0, P = 0;
+
+  while(cin >> angle1 >> angle2) {
+    V.push_back(make_pair(angle1, angle2));
+    V.push_back(make_pair(angle2, angle1));
+    N++;
+  }
+  sort(V.begin(), V.end());
+
+  for(cut C : V){
+    if (!find(T, C.second) && C.second > C.first)  T=insert_keep_balanced(T, C.second); 
+    if ( find(T, C.first)  && C.first  > C.second) T=remove(T, C.first);
+    P+=get_rank(T, C.second);
+    
+  }
+
+  cout << "Cuts: " << N << " Intersections (Should be: 415199866): " << P << endl;
+  cout << "Answer: " << 1 + N + P << endl;
+
+  return;
+}
+
+// ** NlogN runtime solution below **
+
+int main() {
+  cout << endl;
+  cout << "Finding parts in NlogN time..." << endl;
+  nLogNPancake();
+  cout << "Done." << endl << endl;
+
   return 0;
 }
