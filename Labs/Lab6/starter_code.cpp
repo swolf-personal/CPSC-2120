@@ -51,31 +51,21 @@ double get_productivity(Student &s, double t1, double t2)
   return cumulative_productivity(s, t2) - cumulative_productivity(s, t1);
 }
 
-int counter = 0;
+double get_productivity_difference(Student &s, double t1, double t2, double m) {
+  return get_productivity(s,t1,m) - get_productivity(s,m,t2);
+}
 
 // binary search between times t1 and t2 to find the point in time when
 // half of the productivity of student s (between t1 and t2) has been reached
 // e.g., get_productivity(t1,answer) should be half of get_productivity(t1,t2)
 double get_halfway_cutoff(Student &s, double t1, double t2)
 {
-  // TBD: use binary search and the get_productivity() function to return an
-  // answer here that is accurate to within a tolerance of 0.0001
-  // (i.e., the correct cutoff should differ from yours by at most 0.0001)
-  double totalProduct = get_productivity(s, t1, t2);
-
-  double halfProduct = get_productivity(s, t1, t2/2);
-
-  //Within a tolorence, return the productivity between the student's most productive time
-  if(totalProduct - 0.0001 < halfProduct && halfProduct < totalProduct + 0.0001) {
-    return get_productivity(s,t1,t2);
-  }
-  //If there is less productivity on the left side, recurse left
-  else if(halfProduct < ((totalProduct/2) + 0.0001)) {
-   return get_halfway_cutoff(s, t1, t2/2);
-  }
-  //If there is more productivity on the left, recurse right
-  else if(halfProduct > ((totalProduct/2) - 0.0001)) {
-    return get_halfway_cutoff(s, t2/2, t2);
+  double ct1 = t1, ct2 = t2;
+  while(1) {
+    double m = (ct1+ct2)/2;
+    if (abs(get_productivity_difference(s,t1,t2,m)) <= .0001) return ct2; 
+    if (get_productivity_difference(s,t1,t2,m) >= .0001) ct2 = m;
+    else ct1 = m;
   }
 }
 
@@ -108,12 +98,11 @@ int partition(int s1, int s2, double val)
 // e.g., if rank==0, we want to return the minimum cutoff of S[s1..s2]
 double quickselect(int s1, int s2, int rank)
 {
-  if(s1==s2) return 0;
-  double c = S[s1+rand()%(s2-s1+1)].cutoff;
-  int p = partition(s1, s2, c)+s1;
-  if (p == rank) return c;
-  if(rank < p) return quickselect(s1, p, rank);
-  else return quickselect(p, s2, rank);
+  double c = S[rand()%(s2-s1+1) + s1].cutoff;
+  int r = partition(s1, s2, c);
+  if (r == rank) return c;
+  if(rank < r) return quickselect(s1, s1+r-1, rank);
+  else return quickselect(s1+r+1, s2, rank-r-1);
 }
 
 // split time range t1...t2 across students S[s1...s2] (say, n of them), so each of the
