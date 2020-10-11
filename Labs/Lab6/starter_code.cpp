@@ -77,19 +77,13 @@ double get_halfway_cutoff(Student &s, double t1, double t2)
 int partition(int s1, int s2, double val)
 {
   int x = s1-1, y = s1-1, z = s1-1;
-
   //Super secret sauce, pls no steal
   while(z < s2) {
     if(S[++z].cutoff <= val) {
-      if (z > 0 && z>y+1) swap(S[z], S[++y]);
-      else y++;
-      if(S[y].cutoff < val) {
-        if(y > 0 && y>x+1) swap(S[y], S[++x]);
-        else x++;
-      }
+      if (z>++y) swap(S[z], S[y]);
+      if(S[y].cutoff < val && y>++x) swap(S[y], S[x]);
     }
   }
-
   return x+1-s1;
 }
 
