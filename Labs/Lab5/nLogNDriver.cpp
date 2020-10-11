@@ -155,9 +155,10 @@ Node *insert_keep_balanced(Node *T, double k)
 //returns the number of nodes in the tree with keys < x
 int get_rank(Node* T, double k) {
   if(!T) return 0;
-  if(k == T->key) return T->left ? T->left->size : 0;
-  else if(k < T->key) return get_rank(T->left, k);
-  else return (T->left ? T->left->size : 0) + 1 + get_rank(T->right, k);
+  int leftSize = T->left ? T->left->size : 0;
+  if(k == T->key) return leftSize;
+  if(k < T->key) return get_rank(T->left, k);
+  else return (leftSize) + 1 + get_rank(T->right, k);
 }
 
 // prints out the inorder traversal of T (i.e., the contents of T in sorted order)
@@ -212,10 +213,11 @@ void nLogNPancake() {
   sort(V.begin(), V.end());
 
   for(cut C : V){
-    if (!find(T, C.second) && C.second > C.first)  T=insert_keep_balanced(T, C.second); 
+    if (!find(T, C.second) && C.second > C.first) {
+      T=insert_keep_balanced(T, C.second);
+      P+=get_rank(T, C.second);
+    }
     if ( find(T, C.first)  && C.first  > C.second) T=remove(T, C.first);
-    P+=get_rank(T, C.second);
-    
   }
 
   cout << "Cuts: " << N << " Intersections (Should be: 415199866): " << P << endl;
