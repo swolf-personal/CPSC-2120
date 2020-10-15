@@ -14,21 +14,21 @@ Node **T; // array of Node *s for hash table
 int table_size = 10000;  
 
 // check out this awesome hash function!
-int hash(int x)
+int myhash(int x)
 {
   return ((unsigned int)x * 3 + 17) % table_size;
 }
 
 bool find(int x)
 {
-  for (Node *n = T[hash(x)]; n != NULL; n = n->next)
+  for (Node *n = T[myhash(x)]; n != NULL; n = n->next)
     if (n->val == x) return true;
   return false;
 }
 
 void insert(int x)
 {
-  int index = hash(x);
+  int index = myhash(x);
   T[index] = new Node(x, T[index]);
 }
 
