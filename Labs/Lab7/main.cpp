@@ -24,24 +24,43 @@ int* board;
 int boardSize;
 
 int check_row(int rDex) {
-  if(rDex >= boardSize) return 0; //???
+  if(rDex >= boardSize) return 1;
   int rowSol = 0;
   
-  for(int i = 0; i < boardSize; i++) { //Itr - cols
-    for (int x = 0; x <= rDex; x++) { //Itr - above
-      //x = row
-      //y = col
-      int x1 = rDex, y1 = board[i]; //??
-      int x2 = x, y2 = board[x];
-      if(abs(y2-y1) == 1 && (x2-x1 == 0 || abs(x2-x1) == 1)) {
-        break;
-      } else {
-        rowSol += check_row(rDex+1);
+  if(rDex == 0) { //No collide checks for top row
+    for (int x = 0; x <= boardSize; x++) { //Cols
+      rowSol += check_row(rDex+1);
+      board[0]++; 
+    }
+  } else { //Full check loops for all below
+    for (int x = 0; x <= boardSize; x++) { //Cols
+      for (int x = 0; x <= rDex; x++) { //Row above
+        int x1 = x, x2 = rDex;
+        int y1 = board[x], y2 = board[rDex];
+        double slope;
+        if((y2 - y1) != 0) slope = abs(((double)x2-x1)/(y2-y1));
+        if((y2 - y1) == 0 || slope == 1) {
+          if(board[rDex] < boardSize) board[rDex]++;
+          else return 0; //We got through an entire row w/o a valid location, prune dis
+          break;
+        } else {
+          rowSol++;
+          rowSol += check_row(rDex+1);
+          board[rDex]++;
+        }
       }
     }
-
-    return rowSol;
   }
+  //# solutions 0
+  // if rDex >= boardSize return 0
+  // if rDex == 0
+  //   check_row for each pos in board[0]
+  // else 
+  //   check for collisions
+  //   if colide, either move on or prune
+  //   else check_row(rDex+1), board[x]++
+
+  return rowSol;
 }
 
 int main() {
@@ -49,6 +68,7 @@ int main() {
   boardSize = 4;
 
   board = new int[boardSize];
+  for(int i = 0; i < boardSize; i++) board[i] = 0;
 
   cout << "Total Solutions: " << check_row(0) << endl;
 
