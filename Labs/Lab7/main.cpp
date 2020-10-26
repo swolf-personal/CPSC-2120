@@ -47,11 +47,18 @@ int check_row(int rDex) {
         solCount++;
       }
     }
+  } else if (rDex == 0) { //Basic use of symetry... not elegant but I waited too long to optimize
+    for(int y = 0; y < boardSize/2; y++) { //Iterate over all collums on this row
+      board[rDex] = y; //Set the collum to the local check
+      if(!check_col(rDex)) { //Valid position
+        if(rDex < boardSize-1) solCount += check_row(rDex+1);
+      }
+    }
   } else { //Inner layers. Some logic
     for(int y = 0; y < boardSize; y++) { //Iterate over all collums on this row
       board[rDex] = y; //Set the collum to the local check
       if(!check_col(rDex)) { //Valid position
-        solCount += check_row(rDex+1);
+        if(rDex < boardSize-1) solCount += check_row(rDex+1);
       }
     }
   }
@@ -61,12 +68,12 @@ int check_row(int rDex) {
 
 int main() {
   //cin >> boardSize;
-  boardSize = 4;
+  boardSize = 14;
 
   board = new int[boardSize];
   for(int i = 0; i < boardSize; i++) board[i] = 0;
 
-  cout << "Total Solutions: " << check_row(0) << endl;
+  cout << "Total Solutions: " << check_row(0)*2 << endl;
 
   delete[] board;
 
