@@ -2,6 +2,10 @@
 *.json
 *.o
 *.plist
+*.dSYM
+webpages.txt
 hw/hw1/webpages.txt
 Labs/Lab4/bst
 Labs/Lab6/starter_code.dSYM/Contents/Resources/DWARF/starter_code
+Labs/Lab7/main
+Labs/Lab7/main.dSYM/Contents/Resources/DWARF/main

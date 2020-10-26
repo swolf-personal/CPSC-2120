@@ -23,44 +23,40 @@ Solutions = 365,596
 int* board;
 int boardSize;
 
+//Check for collisions at the current x,y
+// NOTE: y (board[x]) needs to be externally inc
+bool check_col(int rDex) {
+  for (int x = 0; x < rDex; x++) { //Row above
+    int x1 = rDex, x2 = x;
+    int y1 = board[rDex], y2 = board[x];
+    double slope;
+    if((y2 - y1) != 0) slope = abs(((double)x2-x1)/(y2-y1));
+    else return true;
+    if(slope == 1) return true;
+  }
+  return false;
+}
+
 int check_row(int rDex) {
-  if(rDex >= boardSize) return 1;
-  int rowSol = 0;
-  
-  if(rDex == 0) { //No collide checks for top row
-    for (int x = 0; x <= boardSize; x++) { //Cols
-      rowSol += check_row(rDex+1);
-      board[0]++; 
+  if(rDex >= boardSize) return 0; //Out of bounds. Nothing to see here...
+  int solCount = 0;
+  if(rDex == boardSize-1) { //Bottom layer. Logic will return 1 if pass
+    for(int y = 0; y < boardSize; y++) { //Iterate over all collums on this row
+      board[rDex] = y; //Set the collum to the local check
+      if(!check_col(rDex)) { //Valid position
+        solCount++;
+      }
     }
-  } else { //Full check loops for all below
-    for (int x = 0; x <= boardSize; x++) { //Cols
-      for (int x = 0; x <= rDex; x++) { //Row above
-        int x1 = x, x2 = rDex;
-        int y1 = board[x], y2 = board[rDex];
-        double slope;
-        if((y2 - y1) != 0) slope = abs(((double)x2-x1)/(y2-y1));
-        if((y2 - y1) == 0 || slope == 1) {
-          if(board[rDex] < boardSize) board[rDex]++;
-          else return 0; //We got through an entire row w/o a valid location, prune dis
-          break;
-        } else {
-          rowSol++;
-          rowSol += check_row(rDex+1);
-          board[rDex]++;
-        }
+  } else { //Inner layers. Some logic
+    for(int y = 0; y < boardSize; y++) { //Iterate over all collums on this row
+      board[rDex] = y; //Set the collum to the local check
+      if(!check_col(rDex)) { //Valid position
+        solCount += check_row(rDex+1);
       }
     }
   }
-  //# solutions 0
-  // if rDex >= boardSize return 0
-  // if rDex == 0
-  //   check_row for each pos in board[0]
-  // else 
-  //   check for collisions
-  //   if colide, either move on or prune
-  //   else check_row(rDex+1), board[x]++
 
-  return rowSol;
+  return solCount;
 }
 
 int main() {
