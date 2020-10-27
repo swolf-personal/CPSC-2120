@@ -1,5 +1,6 @@
 #include <iostream>
-#include <math.h>
+#include <assert.h>
+#include <cmath>
 using namespace std;
 
 /*
@@ -40,7 +41,7 @@ bool check_col(int rDex) {
 int check_row(int rDex) {
   if(rDex >= boardSize) { cout << "BAD" << endl ; return 0;} //Out of bounds. Nothing to see here...
   int solCount = 0;
-  if(rDex == boardSize-1) { //Bottom layer. Logic will return 1 if pass
+  if(rDex == boardSize-1) { //Bottom layer. Will add to total solutions
     for(int y = 0; y < boardSize; y++) { //Iterate over all collums on this row
       board[rDex] = y; //Set the collum to the local check
       if(!check_col(rDex)) { //Valid position
@@ -49,7 +50,7 @@ int check_row(int rDex) {
     }
   } else if (rDex == 0) { 
     if((boardSize % 2) == 0){ //Basic use of symetry... not elegant but I waited too long to optimize
-      for(int y = 0; y < (boardSize/2); y++) { //Iterate over all collums on this row
+      for(int y = 0; y < (boardSize/2); y++) { //Iterate over half the collums in the row
         board[0] = y; //Set the collum to the local check
         if(!check_col(rDex)) { //Valid position
           solCount += check_row(1)*2;
