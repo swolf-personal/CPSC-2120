@@ -3,24 +3,6 @@
 #include <cmath>
 using namespace std;
 
-/*
-- Should be a queen on ever row/col
-- Recursion
-- 2D Array
-- 1D Array which gives index of queen on the col
-
-- Try placing a queen at each spot in row per row
--  Recurse on next row to see if solution conflicts, prune asap
-
-- Queens in upper left * 2 = left + right (for row 0)
--   Aka only check halfish:tm: the board (if even)
--   If it's odd, panic
--    If odd, skip middle
-
-N = 14
-Solutions = 365,596
-*/
-
 int* board;
 int boardSize;
 
