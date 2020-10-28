@@ -13,20 +13,20 @@ vector<Point> pts;
 vector<int> tour;
 vector<int> bestTour;
 
-double get_distance(Point p1, Point p2) {
+double getLength(Point p1, Point p2) {
   return sqrt(pow((p2.x-p1.x), 2) + pow((p2.y-p1.y), 2));
 }
 
-double get_total_length(vector<int> tourCheck) {
+double tourLength(vector<int> tourCheck) {
   double totalDist = 0;
   for(int i = 0; i < 50; i++) {
-    if(i == 49) totalDist += get_distance(pts[tourCheck[i]], pts[tourCheck[0]]);
-    else totalDist += get_distance(pts[tourCheck[i]], pts[tourCheck[i+1]]);
+    if(i == 49) totalDist += getLength(pts[tourCheck[i]], pts[tourCheck[0]]);
+    else totalDist += getLength(pts[tourCheck[i]], pts[tourCheck[i+1]]);
   }
   return totalDist;
 }
 
-void swappening(int i, int j) {
+void swapRun(int i, int j) {
   while (j < i) {
     swap(tour[j], tour[i]);
     j++; i--;
@@ -36,9 +36,9 @@ void swappening(int i, int j) {
 void optimize() {
   for(int i = 1; i < 49; i++) {
     int j = rand()%i;
-    double dist1 = get_distance(pts[tour[i]], pts[tour[i+1]]) + get_distance(pts[tour[j-1]], pts[tour[j]]);
-    double dist2 = get_distance(pts[tour[i]], pts[tour[j-1]]) + get_distance(pts[tour[i+1]], pts[tour[j]]);
-    if(dist1 > dist2) swappening(i, j);
+    double dist1 = getLength(pts[tour[i]], pts[tour[i+1]]) + getLength(pts[tour[j-1]], pts[tour[j]]);
+    double dist2 = getLength(pts[tour[i]], pts[tour[j-1]]) + getLength(pts[tour[i+1]], pts[tour[j]]);
+    if(dist1 > dist2) swapRun(i, j);
   }
 }
 
@@ -56,11 +56,11 @@ int main(void) {
     random_shuffle(tour.begin(), tour.end());
     for(int cItr = 0; cItr < 1000; cItr++) {
       optimize();
-      if(get_total_length(tour) < get_total_length(bestTour)) bestTour = tour;
+      if(tourLength(tour) < tourLength(bestTour)) bestTour = tour;
     }
   }
 
-  cout << "The best tour: " << get_total_length(bestTour) << endl;
+  cout << "The best tour: " << tourLength(bestTour) << endl;
   cout << endl;
   for(int i : bestTour) cout << i << " ";
   cout << endl;
