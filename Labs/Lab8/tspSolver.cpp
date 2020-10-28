@@ -52,7 +52,7 @@ int main(void) {
   for(int i = 0; i<50; i++)
     cin >> pts[i].x >> pts[i].y;
 
-  for(int i = 0; i < 17; i++) { //Listen... I'm not sure why but in this case 17 is a really cool number
+  for(int i = 0; i < 50; i++) {
     random_shuffle(tour.begin(), tour.end());
     for(int cItr = 0; cItr < 1000; cItr++) {
       optimize();
