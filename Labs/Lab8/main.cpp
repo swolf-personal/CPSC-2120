@@ -2,7 +2,6 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
-
 using namespace std;
 
 struct Point {
@@ -27,16 +26,14 @@ double get_total_length(vector<int> tourCheck) {
   return totalDist;
 }
 
-void swappening(int i, int randO) {
-  int l2 = i, l1 = randO;
-  while (l1 < l2) {
-    swap(tour[l1], tour[l2]);
-    l1++;
-    l2--;
+void swappening(int i, int j) {
+  while (j < i) {
+    swap(tour[j], tour[i]);
+    j++; i--;
   }
 }
 
-void reverse() {
+void optimize() {
   for(int i = 1; i < 49; i++) {
     int j = rand()%i;
     double dist1 = get_distance(pts[tour[i]], pts[tour[i+1]]) + get_distance(pts[tour[j-1]], pts[tour[j]]);
@@ -55,10 +52,10 @@ int main(void) {
   for(int i = 0; i<50; i++)
     cin >> pts[i].x >> pts[i].y;
 
-  for(int i = 0; i < 17; i++) {
+  for(int i = 0; i < 17; i++) { //Listen... I'm not sure why but in this case 17 is a really cool number
     random_shuffle(tour.begin(), tour.end());
     for(int cItr = 0; cItr < 1000; cItr++) {
-      reverse();
+      optimize();
       if(get_total_length(tour) < get_total_length(bestTour)) bestTour = tour;
     }
   }
