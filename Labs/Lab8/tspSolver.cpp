@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -48,13 +49,15 @@ int main(void) {
     tour[i] = i;
   bestTour = tour;
 
+  ifstream file("/group/course/cpsc212/f20/lab08/tsp_points.txt");
   pts.resize(50);
   for(int i = 0; i<50; i++)
-    cin >> pts[i].x >> pts[i].y;
+    file >> pts[i].x >> pts[i].y;
+  file.close();
 
-  for(int i = 0; i < 50; i++) {
+  for(int i = 0; i < 1000; i++) {
     random_shuffle(tour.begin(), tour.end());
-    for(int cItr = 0; cItr < 1000; cItr++) {
+    for(int cItr = 0; cItr < 100; cItr++) {
       optimize();
       if(tourLength(tour) < tourLength(bestTour)) bestTour = tour;
     }
