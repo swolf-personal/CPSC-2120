@@ -47,10 +47,11 @@ bool slowDiff(Node a, Node b){
   }
   return isDiff;
 }
-
+int pathSize = 0;
 // Print path from x to y
 void mark_path(Node x, Node y)
 {
+  pathSize++;
   if (x != y) mark_path(x, pred[y]);
   else return;
   cout << y << endl;
@@ -79,6 +80,8 @@ int main(void) {
   bfs("graph");
   cout << "graph" << endl; //Cheap hack to not have to fix the recursion
   mark_path("graph", "paths");
+
+  cout << "Path size: " << pathSize << endl;
 
   return 0;
 }
