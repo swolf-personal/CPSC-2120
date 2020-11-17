@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 using namespace std;
 
 struct Candy {
@@ -24,13 +25,17 @@ vector<Candy> rawCandy;
 void getCandy() {
   rawCandy.resize(16);
   int weightIn = 0, tasteIn = 0, count = 0;
-  while(cin >> weightIn >> tasteIn) {
+  //ifstream file("/group/course/cpsc212/f20/lab08/tsp_points.txt");
+  ifstream file("candy.txt");
+  while(file >> weightIn >> tasteIn) {
     rawCandy[count].weight = weightIn;
     rawCandy[count].taste = tasteIn;
     rawCandy[count].value = (double)tasteIn/weightIn;
     count++;
   }
+  file.close();
 }
+
 
 int totalValue() {
   int total = 0;
