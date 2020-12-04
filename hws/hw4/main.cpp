@@ -9,16 +9,41 @@ using namespace std;
 
 /* Image code borrowed from our USA map demo... */
 
+/* Given Pixel struct
 struct Pixel {
   unsigned char r, g, b;
 };
+*/
 
+//Custom Pixel struct
+struct Pixel {
+  unsigned char r, g, b;
+  Pixel(): r(0), b(0), g(0) {}
+  Pixel(unsigned char c) : r(c), b(c), g(c) {}
+  Pixel(unsigned char rI, unsigned char gI, unsigned char bI) : r(rI), g(gI), b(bI) {}
+};
+
+/* Given variable setup
 int width, height;
 Pixel *image;
 
 Pixel white = { 255, 255, 255 };
 Pixel black = { 0, 0, 0 };
 Pixel red = { 255, 0, 0 };
+*/
+
+//Custom variable setup
+int width, height;
+Pixel *image;
+bool *visted;
+
+Pixel white(255);
+Pixel black(0);
+Pixel red(255,0,0);
+
+int *interest;
+
+queue<tuple<int,int,int> > pixelQueue;
 
 bool operator== (Pixel &a, Pixel &b) {
   return a.r==b.r && a.g==b.g && a.b==b.b;
@@ -32,6 +57,17 @@ Pixel &get_pixel(int x, int y)
   return image[y*width + x];
 }
 
+//Somewhat confusingly a higher interest value corresponds to a lower importance... boring is interesting!
+int &get_interest(int x, int y)
+{
+  return interest[y*width + x];
+}
+
+//Simple 1D array of visted pixels. Could use one long int?
+bool& have_visited(int x, int y) {
+  return visted[y*width + x];
+}
+
 void read_image(const char *filename)
 {
   FILE *fp = fopen (filename, "r");
@@ -40,15 +76,120 @@ void read_image(const char *filename)
   dummy = fread (image, width*height, sizeof(Pixel), fp);
 }
 
+//Enqueue all white pixels
+void queue_white() {
+  for(int i = 0; i < width*height; i++) {
+    if(image[i] == white)
+      pixelQueue.push(make_tuple((i % width),(i / width),0));
+  }
+}
+
 // Import this from your solution to the first part...
 void calculate_blur(void)
 {
+  queue_white();
+  visted = new bool[width * height]; //Probably should refactor as local to function, but who cares about leaks now right? :)
+  interest = new int[width * height];
 
+  while (!pixelQueue.empty()) {    
+    int x = get<0>(pixelQueue.front());
+    int y = get<1>(pixelQueue.front());
+    int d = get<2>(pixelQueue.front());
+    unsigned char color = 255*pow(0.9, d);
+    pixelQueue.pop();    
+
+    //if (d > 80) continue; //At this depth there will be little effect...
+    if (x<0 || y<0 || x>=width || y>=height) continue;   
+    if (get_pixel(x,y).r > color) continue; 
+    if (have_visited(x,y)) continue;
+    
+    get_interest(x,y) = d;
+    have_visited(x,y) = true; 
+    get_pixel(x,y) = Pixel(color);
+
+    pixelQueue.push(make_tuple(x+1,y,d+1));    
+    pixelQueue.push(make_tuple(x-1,y,d+1));    
+    pixelQueue.push(make_tuple(x,y+1,d+1));    
+    pixelQueue.push(make_tuple(x,y-1,d+1));
+  }
+}
+
+typedef pair<int,int> Node;
+typedef pair<int,int> pin; // (distance to node, node)
+
+vector<int> all_nodes;
+//int *dist;
+map<int,int> dist;
+map<int, int> pred;
+map<int, vector<int>> nbrs;
+map<pair<int,int>, int> edge_wt;
+
+void queue_nbrs(int top) {
+  int x = (top % width);
+  int y = (top / width);
+  if(x < 0 || y < 0 || x > width || y > height) return;
+  all_nodes.push_back(top);
+  if(x > width+1 || y > height+1) return;
+  nbrs[top].push_back((y+1)*width + x);
+  nbrs[top].push_back((y+1)*width + x+1);
+  nbrs[top].push_back((y+1)*width + x-1);
+  queue_nbrs((y+1)*width + x);
+  queue_nbrs((y+1)*width + x+1);
+  queue_nbrs((y+1)*width + x-1);
+}
+
+//Set the seam as red. Dest is 
+void set_seam(int top, int bottom) {
+  queue_nbrs(top);
+  //Set distance to inifitny...?
+  for (int &a : all_nodes) dist[a] = 99999999;  
+
+  //Our source has no distance
+  dist[top] = 0;  
+  //Create a prioty queue ordered on distance, with the node ref
+  priority_queue<pin, vector<pin>, greater<pin>> to_visit; 
+  //Push the source node in with its priority of 0 (I think we need this to be the inf part btw)
+  to_visit.push(make_pair(0, top));  
+  //While there are items on the work list
+  while (!to_visit.empty()) {  
+    //The node in question gets taken off the top
+    int x = to_visit.top().second;
+    //Take out the node to visit
+    to_visit.pop();    
+    //If we're at our destination we're done.
+    if (x == bottom) return;    
+    //Iterate over all nbrs
+    for (int n : nbrs[x]) {     
+      //get weight from calculation
+      //int weight = edge_wt[make_pair(x,n)]; 
+      int weight = interest[x];
+      //Do a lil maths w/ the distance and weight
+      if (dist[x] - weight < dist[n]) {    
+        dist[n] = dist[x] - weight;
+        pred[n] = x;
+        image[n] = red;
+        to_visit.push(make_pair(dist[n], n));
+      }    
+    }  
+  }
 }
 
 // To be written -- solve a shortest path problem to find a seam and color it red
 void calculate_seam(void)
 {
+  int mostInterestingTop = 0;
+  int mostInterestingBottom = 0;
+  for(int i = 0; i < width; i++) {
+    if(interest[i] > interest[mostInterestingTop])
+      mostInterestingTop = i;
+    if(interest[(height-1)*width + i] > interest[mostInterestingBottom])
+      mostInterestingBottom = (height-1)*width + i;
+  }
+
+
+
+  //Most interesting is our new start point, do a dijkstra on it.
+  set_seam(mostInterestingTop, mostInterestingBottom);
 
 }
 
@@ -114,8 +255,8 @@ void render(void)
     for (int y=0; y<height; y++) {
       Pixel p = get_pixel(x, y);
       if (show_blurred_image || p == white || p == red) {
-	set_color (p.r, p.g, p.b); 
-	draw_pixel(x, y);
+	      set_color (p.r, p.g, p.b); 
+	      draw_pixel(x, y);
       }
     }
 
@@ -138,9 +279,9 @@ bool timer(int msec)
     cumulative -= 1000;
     if (seam_exists()) {
       if (found_seam) {
-	remove_seam();
-	found_seam = false;
-	return true;
+        remove_seam();
+        found_seam = false;
+        return true;
       }
       found_seam = true;
     }

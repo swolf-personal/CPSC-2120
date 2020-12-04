@@ -56,8 +56,17 @@ bool operator== (Pixel &a, Pixel &b) {
   return a.r == b.r && a.g == b.g && a.b == b.b;
 }
 
+void queue_white() {
+  for(int i = 0; i < width*height; i++) {
+    if(image[i] == white)
+      pixelQueue.push(make_tuple((i % width),(i / width),0));
+  }
+}
+
 void calculate_blur()
-{  
+{
+  queue_white();
+
   while (!pixelQueue.empty()) {    
     int x = get<0>(pixelQueue.front());
     int y = get<1>(pixelQueue.front());
@@ -80,18 +89,10 @@ void calculate_blur()
   }
 }
 
-void queue_white() {
-  for(int i = 0; i < width*height; i++) {
-    if(image[i] == white)
-      pixelQueue.push(make_tuple((i % width),(i / width),0));
-  }
-}
-
 int main(void)
 {
   read_image("paw.ppm");
-
-  queue_white();
+  
   calculate_blur();
 
   write_image("paw2.ppm");
