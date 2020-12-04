@@ -1,0 +1,93 @@
+00:19:17	Brady Loggins:	I too have a calc test today
+00:19:18	Stephen Wolf:	That sounds like way too many calculi
+00:20:04	Wyatt Dorris:	oh god oh no not KD Trees
+00:20:29	Nathan Jones:	Katie tree?
+00:21:27	Brady Loggins:	KD… is this where we betray our loyal followings and teachings to go play for a better team?
+00:21:41	Tahj Anderson:	lol
+00:21:44	Jacob Mcfadyen:	0/0/4 :(
+00:21:45	Nick Rabon:	lol
+00:21:49	Wyatt Dorris:	ring is a ring
+00:24:52	Josh Hunt:	F to the short king at the bottom
+00:25:09	Brady Loggins:	More like Lord arquad
+00:25:10	Tahj Anderson:	😂
+00:25:13	Brady Loggins:	Farquad*
+00:26:06	Wyatt Dorris:	what about the box on the line
+00:27:13	Jacob Mcfadyen:	Are the percentages attached to the red fox, kit fox, and grey fox the second to last layer weight?
+00:28:43	Paul Dubberly:	See the tenth layer understands good vs evil because it knows to fire at the cat
+00:29:23	Nathan Jones:	Do we know if neural networks require more or less training than humans?
+00:29:28	Wyatt Dorris:	More
+00:29:48	Michael Havasy:	So does the training use a GE?
+00:29:53	Michael Havasy:	GA*
+00:30:24	Matthew Perry:	3blue1brown has a series on it
+00:30:33	Paul Dubberly:	^^
+00:30:40	Paul Dubberly:	Its really good
+00:30:50	Jacob Mcfadyen:	3blue1brown made me like high school calculus
+00:31:20	Matthew Perry:	wait is this how that group came up with that toaster sticker
+00:31:32	Thomas Giaimo:	terrifying
+00:31:41	Stephen Wolf:	Oh no… hopefully it doesn’t start trying to make humans more “good”
+00:31:44	Tahj Anderson:	😟
+00:31:48	Edward Ng:	the neural network's idea of the ideal cat
+00:31:50	John Perez:	well that's the most catlike cat I've ever seen for sure 
+00:31:51	Nathan Jones:	EYES
+00:32:06	Jacob Mcfadyen:	Lisa Frank featuring Cthuhlu
+00:32:07	Michael Havasy:	Is this a seraphim
+00:32:08	Nathan Jones:	Theres a lizard on its ear
+00:32:24	Brady Loggins:	What ever it is we need to kill it
+00:32:29	Paul Dubberly:	Little scary how close we are to computers telling us how we should be more human
+00:32:30	Tahj Anderson:	Neural network on acid lol
+00:32:32	Stephen Wolf:	So basically LSD
+00:32:34	Wyatt Dorris:	Aliens "Look at the caveman's art they made with primitive technology"
+00:32:46	Matthew Perry:	Was that how they made that sticker that caused the machine to classify anything as a toaster
+00:39:42	Aaron Woolfolk:	array
+00:39:50	Wyatt Dorris:	yeah probably a sorted array
+00:40:50	Paul Dubberly:	lol
+00:41:23	Tahj Anderson:	👁👄👁
+00:41:24	Stephen Wolf:	Physicists are not happy with you writing off string theory like that
+00:41:29	Paul Dubberly:	10,000 dimensionally partial differentiation is great
+00:42:03	Michael Havasy:	Wow imagine that
+00:42:09	Wyatt Dorris:	^ lol
+00:42:23	Edward Ng:	wow never saw that one coming /s
+00:42:31	Michael Havasy:	Very big distance formula
+00:43:54	Stephen Wolf:	Are the points on the line randomly allocated left/right?
+00:44:21	Brady Loggins:	Are you splitting 11 numbers here?
+00:44:41	Stephen Wolf:	Oh, sorry I mean the line as in the dotted line that splits the points into left and right
+00:44:46	Jacob Mcfadyen:	So the node X, Y1. and Y2, do they contain coordinate values?
+00:45:29	Brady Loggins:	So a pointer to a set of 11 points
+00:45:29	Cierra Oliveira:	so A.x is equal to B.x but A.y is equal to C.y ?
+00:46:06	Cierra Oliveira:	oh okay gotcha gotcha
+00:46:23	Michael Havasy:	TIHI
+00:46:26	Nathan Jones:	So each circle is a new node
+00:46:30	Nathan Jones:	x again
+00:46:31	Paul Dubberly:	z
+00:47:27	Jacob Mcfadyen:	so would red black trees be useful? you dont want to split on x twice in a row
+00:49:05	Wyatt Dorris:	so are you inserting as new nodes x, y1, y2 after you have built it?
+00:49:13	Nathan Jones:	Do we have to assume no two points share any coordinates?
+00:49:29	Nathan Jones:	So you can’t have 3,5 and 4,5?
+00:53:48	Stephen Wolf:	Could a kD tree be useful in storing strings with each character value as a dimension?
+00:54:08	Nathan Jones:	It incrememnts
+00:54:16	Paul Dubberly:	%
+00:55:03	Paul Dubberly:	Will the Node constructor make a copy or just pass the pointer?
+00:55:36	Paul Dubberly:	Just don't change things
+00:55:46	Paul Dubberly:	If you only pass the pointer
+00:56:37	Nathan Jones:	Backwards lab periods are weird
+00:57:06	Paul Dubberly:	k nearest neighbors
+00:57:33	Wyatt Dorris:	I didn't realize how beneficial it is to have the first lab period 
+00:58:00	Nathan Jones:	I miss having a weekend to do the lab
+00:58:07	Tahj Anderson:	^
+01:02:32	Paul Dubberly:	2^11
+01:02:36	Nathan Jones:	A lot
+01:03:54	Wyatt Dorris:	back when we didn't have 0's added to class numbers for no reason
+01:04:39	Nathan Jones:	That would be a cool lab
+01:04:46	Jacob Mcfadyen:	whoa
+01:05:32	Stephen Wolf:	RTX on
+01:05:34	Matthew Perry:	what!
+01:05:49	Karl Schmidt:	That would have been so cool
+01:05:54	Matthew Perry:	Bring it back
+01:05:58	Jacob Mcfadyen:	^
+01:06:19	Wyatt Dorris:	woah let's calm down. Perhaps an ungraded lab? XD
+01:06:25	Matthew Perry:	^^
+01:06:26	Nathan Jones:	EC
+01:06:28	Paul Dubberly:	^^
+01:06:37	Michael Havasy:	You guys complain about stuff way easier than this you don't want this/
+01:06:48	Pablo Galindo:	^^
+01:06:50	Wyatt Dorris:	^^

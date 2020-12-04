@@ -6,20 +6,25 @@
 #include <string>
 using namespace std;
 
-//Put words into hash
-//Diif words, check hash (Is there a faster way?)
-//Queue diffs as nbrs
-
 typedef string Node;
 vector<Node> all_nodes;
 map<Node, int> dist;
 map<Node, vector<Node>> nbrs;
 map<Node, Node> pred;
 
+int maxDist = 0;
+int longestDist = 0;
+
+vector<Node> longestPath;
+vector<Node> longestNbrs;
+
 //DEFINITELY not stolen
 void bfs(Node source)
 {
-  for (Node &a : all_nodes) dist[a] = all_nodes.size();
+  for (Node &a : all_nodes) {
+    dist[a] = all_nodes.size();
+    pred[a] = a;
+  }
   dist[source] = 0;
   queue<Node> to_visit;
   to_visit.push(source);
@@ -27,9 +32,12 @@ void bfs(Node source)
   while (!to_visit.empty()) {
     Node x = to_visit.front();
     to_visit.pop();
+    longestNbrs.clear();
     for (Node n : nbrs[x])
       if (dist[n] == all_nodes.size()) {
 	      dist[n] = 1 + dist[x];
+        maxDist = 1 + dist[x];
+        longestNbrs.push_back(n);
 	      pred[n] = x;
 	      to_visit.push(n);
       }
@@ -47,14 +55,12 @@ bool slowDiff(Node a, Node b){
   }
   return isDiff;
 }
-int pathSize = 0;
-// Print path from x to y
-void mark_path(Node x, Node y)
+
+void log_path(Node x, Node y)
 {
-  pathSize++;
-  if (x != y) mark_path(x, pred[y]);
+  if (x != y) log_path(x, pred[y]);
   else return;
-  cout << y << endl;
+  longestPath.push_back(y);
 }
 
 void build_graph() {
@@ -64,24 +70,32 @@ void build_graph() {
   while (input >> word)
     all_nodes.push_back(word);
 
-  //This is reallyyyyy slow so... hashtable. Duh.
   for(Node& n : all_nodes) {
     for(Node& w : all_nodes) {
       if(slowDiff(n,w)) nbrs[n].push_back(w);
     }
-    pred[n] = n; //This... yeah idk.
+    pred[n] = n;
   }
   input.close();
 }
 
 int main(void) {
-
   build_graph();
-  bfs("graph");
-  cout << "graph" << endl; //Cheap hack to not have to fix the recursion
-  mark_path("graph", "paths");
+  for(Node& n : all_nodes) {
+    bfs(n);
+    if(maxDist > longestDist) { 
+      longestDist = maxDist; 
+      longestPath.clear();
+      longestPath.push_back(n);
+      log_path(n, longestNbrs[0]);
+    }
+    maxDist = 0;
+  }
 
-  cout << "Path size: " << pathSize << endl;
+  for(Node& w : longestPath) {
+    cout << w << endl;
+  }
+  cout << "Longest ladder is " << longestDist+1 << " words." << endl;
 
   return 0;
 }
