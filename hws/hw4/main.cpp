@@ -114,16 +114,6 @@ void calculate_blur(void)
   }
 }
 
-typedef pair<int,int> Node;
-typedef pair<int,int> pin; // (distance to node, node)
-
-vector<int> all_nodes;
-//int *dist;
-map<int,int> dist;
-map<int, int> pred;
-map<int, vector<int>> nbrs;
-map<pair<int,int>, int> edge_wt;
-
 void queue_nbrs(int top) {
   int x = (top % width);
   int y = (top / width);
@@ -138,59 +128,10 @@ void queue_nbrs(int top) {
   queue_nbrs((y+1)*width + x-1);
 }
 
-//Set the seam as red. Dest is 
-void set_seam(int top, int bottom) {
-  queue_nbrs(top);
-  //Set distance to inifitny...?
-  for (int &a : all_nodes) dist[a] = 99999999;  
-
-  //Our source has no distance
-  dist[top] = 0;  
-  //Create a prioty queue ordered on distance, with the node ref
-  priority_queue<pin, vector<pin>, greater<pin>> to_visit; 
-  //Push the source node in with its priority of 0 (I think we need this to be the inf part btw)
-  to_visit.push(make_pair(0, top));  
-  //While there are items on the work list
-  while (!to_visit.empty()) {  
-    //The node in question gets taken off the top
-    int x = to_visit.top().second;
-    //Take out the node to visit
-    to_visit.pop();    
-    //If we're at our destination we're done.
-    if (x == bottom) return;    
-    //Iterate over all nbrs
-    for (int n : nbrs[x]) {     
-      //get weight from calculation
-      //int weight = edge_wt[make_pair(x,n)]; 
-      int weight = interest[x];
-      //Do a lil maths w/ the distance and weight
-      if (dist[x] - weight < dist[n]) {    
-        dist[n] = dist[x] - weight;
-        pred[n] = x;
-        image[n] = red;
-        to_visit.push(make_pair(dist[n], n));
-      }    
-    }  
-  }
-}
-
 // To be written -- solve a shortest path problem to find a seam and color it red
 void calculate_seam(void)
 {
-  int mostInterestingTop = 0;
-  int mostInterestingBottom = 0;
-  for(int i = 0; i < width; i++) {
-    if(interest[i] > interest[mostInterestingTop])
-      mostInterestingTop = i;
-    if(interest[(height-1)*width + i] > interest[mostInterestingBottom])
-      mostInterestingBottom = (height-1)*width + i;
-  }
-
-
-
-  //Most interesting is our new start point, do a dijkstra on it.
-  set_seam(mostInterestingTop, mostInterestingBottom);
-
+  
 }
 
 /* Code to find and remove seams */
