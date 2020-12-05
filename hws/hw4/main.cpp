@@ -42,6 +42,8 @@ Pixel black(0);
 Pixel red(255,0,0);
 
 int *interest;
+int *weight;
+int *pred;
 
 queue<tuple<int,int,int> > pixelQueue;
 
@@ -61,6 +63,16 @@ Pixel &get_pixel(int x, int y)
 int &get_interest(int x, int y)
 {
   return interest[y*width + x];
+}
+
+int &get_weight(int x, int y)
+{
+  return weight[y*width + x];
+}
+
+int downscale(int x, int y)
+{
+  return y*width + x;
 }
 
 //Simple 1D array of visted pixels. Could use one long int?
@@ -114,24 +126,65 @@ void calculate_blur(void)
   }
 }
 
-void queue_nbrs(int top) {
-  int x = (top % width);
-  int y = (top / width);
-  if(x < 0 || y < 0 || x > width || y > height) return;
-  all_nodes.push_back(top);
-  if(x > width+1 || y > height+1) return;
-  nbrs[top].push_back((y+1)*width + x);
-  nbrs[top].push_back((y+1)*width + x+1);
-  nbrs[top].push_back((y+1)*width + x-1);
-  queue_nbrs((y+1)*width + x);
-  queue_nbrs((y+1)*width + x+1);
-  queue_nbrs((y+1)*width + x-1);
+void set_seam() {
+  //Set up the boys
+  pred = new int[width*height];
+  for(int p = 0; p < width*height; p++)
+    pred[p] = -1;
+  weight = new int[width*height];
+  for(int w = 0; w < width*height; w++)
+    weight[w] = 99999999;
+  
+  //Oh look a queue
+  queue<int> seamQ;
+
+  //Put all da top dawgs into the queue
+  for(int i = 0; i < width; i++) {
+    seamQ.push(i);
+    weight[i] = 0;
+  }
+  
+  while(!seamQ.empty()) {
+    //int pWeight = seamQ.front().first;
+    int pixel = seamQ.front();
+    double x = (pixel % width);
+    double y = (pixel / width);
+    seamQ.pop();
+
+    if (x<0 || y<0 || x>=width || y>=height) continue;
+    if (y+1>=height) continue; //If no one is below we ain't interested
+    for(int i = -1; i <= 1; i++) {
+      if(x+i < 0 || x+i >= width) continue;
+      if(get_weight(x,y) + get_pixel(x+1,y+1).r < get_weight(x+i, y+1)) {
+        get_weight(x+i, y+1) = get_weight(x,y) + get_pixel(x+1,y+1).r;
+        pred[downscale(x+i,y+1)] = pixel;
+        seamQ.push(downscale(x+i,y+1));
+      }
+    }
+  }
 }
 
 // To be written -- solve a shortest path problem to find a seam and color it red
 void calculate_seam(void)
 {
-  
+  set_seam();
+
+  int bestWeight = 999999;
+  int currentPred = -1;
+  for(int i = 0; i < width; i++) {
+    if(weight[downscale(i,399)] < bestWeight) {
+      bestWeight = weight[downscale(i,399)];
+      currentPred = downscale(i,399);
+    }
+  }
+  image[currentPred] = red;
+  while(currentPred != -1) {
+    double x = (currentPred % width);
+    double y = (currentPred / width);
+    cout << x << " " << y << endl;
+    currentPred = pred[currentPred];
+    image[currentPred] = red;
+  }
 }
 
 /* Code to find and remove seams */
@@ -149,8 +202,8 @@ void remove_seam(void)
     int where_red = -1;
     for (int x=0; x<width; x++)
       if (get_pixel(x,y) == red)
-	if (where_red!=-1) { cout << "Error: row " << y << " hass >1 red pixel set\n"; exit(0); }
-	else where_red = x;
+	  if (where_red!=-1) { cout << "Error: row " << y << " hass >1 red pixel set\n"; exit(0); }
+	  else where_red = x;
     if (where_red == -1) { cout << "Error: row " << y << " has 0 red pixels set\n"; exit(0); }
     for (int x=where_red; x<width-1; x++) get_pixel(x,y) = get_pixel(x+1,y);
   }
