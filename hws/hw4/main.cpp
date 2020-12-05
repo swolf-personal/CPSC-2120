@@ -100,8 +100,10 @@ void queue_white() {
 void calculate_blur(void)
 {
   queue_white();
-  visted = new bool[width * height]; //Probably should refactor as local to function, but who cares about leaks now right? :)
-  interest = new int[width * height];
+  for(int p = 0; p < width*height; p++)
+    visted[p] = false;
+  for(int p = 0; p < width*height; p++)
+    interest[p] = 0;
 
   while (!pixelQueue.empty()) {    
     int x = get<0>(pixelQueue.front());
@@ -110,7 +112,6 @@ void calculate_blur(void)
     unsigned char color = 255*pow(0.9, d);
     pixelQueue.pop();    
 
-    //if (d > 80) continue; //At this depth there will be little effect...
     if (x<0 || y<0 || x>=width || y>=height) continue;   
     if (get_pixel(x,y).r > color) continue; 
     if (have_visited(x,y)) continue;
@@ -127,11 +128,8 @@ void calculate_blur(void)
 }
 
 void set_seam() {
-  //Set up the boys
-  pred = new int[width*height];
   for(int p = 0; p < width*height; p++)
     pred[p] = -1;
-  weight = new int[width*height];
   for(int w = 0; w < width*height; w++)
     weight[w] = 99999999;
   
@@ -145,18 +143,17 @@ void set_seam() {
   }
   
   while(!seamQ.empty()) {
-    //int pWeight = seamQ.front().first;
     int pixel = seamQ.front();
-    double x = (pixel % width);
-    double y = (pixel / width);
+    int x = (pixel % width);
+    int y = (pixel / width);
     seamQ.pop();
 
     if (x<0 || y<0 || x>=width || y>=height) continue;
     if (y+1>=height) continue; //If no one is below we ain't interested
     for(int i = -1; i <= 1; i++) {
       if(x+i < 0 || x+i >= width) continue;
-      if(get_weight(x,y) + get_pixel(x+1,y+1).r < get_weight(x+i, y+1)) {
-        get_weight(x+i, y+1) = get_weight(x,y) + get_pixel(x+1,y+1).r;
+      if(get_weight(x,y) + get_pixel(x+i,y+1).r < get_weight(x+i, y+1)) {
+        get_weight(x+i, y+1) = get_weight(x,y) + get_pixel(x+i,y+1).r;
         pred[downscale(x+i,y+1)] = pixel;
         seamQ.push(downscale(x+i,y+1));
       }
@@ -172,18 +169,14 @@ void calculate_seam(void)
   int bestWeight = 999999;
   int currentPred = -1;
   for(int i = 0; i < width; i++) {
-    if(weight[downscale(i,399)] < bestWeight) {
-      bestWeight = weight[downscale(i,399)];
-      currentPred = downscale(i,399);
+    if(weight[downscale(i,height-1)] < bestWeight) {
+      bestWeight = weight[downscale(i,height-1)];
+      currentPred = downscale(i,height-1);
     }
   }
-  image[currentPred] = red;
   while(currentPred != -1) {
-    double x = (currentPred % width);
-    double y = (currentPred / width);
-    cout << x << " " << y << endl;
-    currentPred = pred[currentPred];
     image[currentPred] = red;
+    currentPred = pred[currentPred];
   }
 }
 
@@ -197,6 +190,7 @@ bool seam_exists(void)
 
 void remove_seam(void)
 {
+
   cout << "Removing seam to decrease width to " << width-1 << "\n";
   for (int y=0; y<height; y++) {
     int where_red = -1;
@@ -214,10 +208,11 @@ void remove_seam(void)
   image = new Pixel[height * width];
   for (int x=0; x<width; x++)
     for (int y=0; y<height; y++)
-	  get_pixel(x,y) = orig_image[y*(width+1)+x];
+	    get_pixel(x,y) = orig_image[y*(width+1)+x];
   delete [] orig_image;
 
-  calculate_blur();  
+  calculate_blur();
+
 }
 
 /* Simple 2D interactive graphics code... */
@@ -227,7 +222,13 @@ bool show_blurred_image = false;
 // Called on each keypress
 void keyhandler(int key)
 {
-  if (key == 'q') exit(0);
+  if (key == 'q') {
+    exit(0);
+    delete [] pred;
+    delete [] weight;
+    delete [] visted;
+    delete [] interest;
+  }
 
   // Toggle showing blurred image (off-white pixels)
   if (key == 'b') show_blurred_image = !show_blurred_image;
@@ -286,6 +287,10 @@ bool timer(int msec)
 int main(int argc, char *argv[])
 {
   read_image("billboard.ppm");
+  pred = new int[width*height];
+  weight = new int[width*height];
+  visted = new bool[width * height]; //Probably should refactor as local to function, but who cares about leaks now right? :)
+  interest = new int[width * height];
   calculate_blur();
   init_graphics(argc, argv, width, height, render, keyhandler, timer);
 }

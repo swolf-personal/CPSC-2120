@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <vector>
 #include <cmath>
+#include <queue>
 #include "assert.h"
 using namespace std;
 
@@ -43,10 +44,49 @@ double get_dist(int p, int q)
 // Determine closest point in the kd-tree to all_points[p]
 // Return the index of this point in the "nearest" variable
 // Assume "nearest" is initially set to -1
+/*
+priority_queue<int> nbrs;
 void kd_nearest(Node *root, int p, int dim, int &nearest)
 {
   // TBD: Fill in this function.
   // How hard could it be...
+  
+  //all_points[root->p].data[DIM]
+
+  if (root == NULL) return;
+  nbrs.push(get_dist(p,root->p)); // Add distance from v to T->key to nbrs
+  nbrs.pop();   // Remove farthest nbr distance to keep nbrs.size()==k
+  if (all_points[p].data[dim] <= all_points[root->p].data[dim]) {
+    // Add code here...
+  } else {
+    // Add code here...
+  }
+}*/
+
+// Determine closest point in the kd-tree to all_points[p]
+// Return the index of this point in the "nearest" variable
+// Assume "nearest" is initially set to -1
+void kd_nearest(Node *root, int p, int dim, int &nearest)
+{
+  // TBD: Fill in this function.
+  // How hard could it be...
+  if (root == NULL) return;
+  if (nearest == -1 && root->p != p)
+      nearest = root->p;
+  else if (root->p != p && get_dist(p, root->p) < get_dist(p, nearest)) {
+      nearest = root->p;
+  } if (all_points[root->p].data[dim] > all_points[p].data[dim] ) {    
+      kd_nearest(root->left , p, (dim<D-1 ? dim+1 : 0), nearest);
+      if (abs(all_points[root->p].data[dim] - all_points[p].data[dim]) < get_dist(p, nearest)) {
+          kd_nearest(root->right, p, (dim<D-1 ? dim+1 : 0), nearest);
+      }
+  } else {
+      kd_nearest(root->right, p, (dim<D-1 ? dim+1 : 0), nearest);
+      if (abs(all_points[root->p].data[dim] - all_points[p].data[dim]) < get_dist(p, nearest)) {
+          kd_nearest(root->left , p, (dim<D-1 ? dim+1 : 0), nearest);
+      }
+  }
+  return;
 }
 
 int confusion[10][10];
