@@ -1,0 +1,19 @@
+4(a). O(nlogn)
+
+4(b). O(n+m)
+
+4(c). He was cool and used dijkstra so O(M+NlogN)
+
+4(d). O(N)
+
+4(e). O(NlogN)
+
+4(f). Theta(NlogN)
+
+4(g). O(NLogN)
+
+4(h). O(log^2N)
+
+4(i). O(NlogN)
+
+4(j). O(N^2)
